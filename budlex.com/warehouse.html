@@ -1,0 +1,801 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel Administracyjny - Sklep Budowlany - Magazyn</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.2.0/css/bootstrap.min.css">
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --secondary-color: #f39c12;
+            --light-gray: #ecf0f1;
+            --dark-gray: #7f8c8d;
+            --shelf-1-color: #e3f2fd;
+            --shelf-2-color: #fff3e0;
+            --shelf-3-color: #fbe9e7;
+            --shelf-4-color: #ffebee;
+            --shelf-5-color: #e8f5e9;
+            --shelf-6-color: #f3e5f5;
+            --shelf-7-color: #e0f7fa;
+            --shelf-8-color: #f9fbe7;
+            --shelf-9-color: #fce4ec;
+            --shelf-10-color: #e1f5fe;
+            --shelf-11-color: #f1f8e9;
+            --shelf-12-color: #fffde7;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            display: flex;
+            min-height: 100vh;
+            background-color: #f8f9fa;
+        }
+
+        #sidebar {
+            width: 250px;
+            background-color: var(--primary-color);
+            color: white;
+            transition: all 0.3s;
+            position: fixed;
+            height: 100%;
+            overflow-y: auto;
+            z-index: 1000;
+        }
+
+            #sidebar .sidebar-header {
+                padding: 20px;
+                background-color: rgba(0, 0, 0, 0.1);
+            }
+
+            #sidebar ul.components {
+                padding: 20px 0;
+                border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            }
+
+            #sidebar ul li a {
+                padding: 15px;
+                display: block;
+                color: white;
+                text-decoration: none;
+                transition: all 0.3s;
+                border-left: 3px solid transparent;
+            }
+
+                #sidebar ul li a:hover {
+                    background-color: rgba(255, 255, 255, 0.1);
+                    border-left: 3px solid var(--secondary-color);
+                }
+
+            #sidebar ul li.active > a {
+                background-color: rgba(255, 255, 255, 0.1);
+                border-left: 3px solid var(--secondary-color);
+            }
+
+        #content {
+            width: calc(100% - 250px);
+            margin-left: 250px;
+            padding: 20px;
+            transition: all 0.3s;
+        }
+
+        .card {
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+            border: none;
+        }
+
+        .card-header {
+            background-color: white;
+            border-bottom: 1px solid #eee;
+            border-radius: 10px 10px 0 0 !important;
+            padding: 15px 20px;
+            font-weight: 600;
+        }
+
+        .table-responsive {
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        table thead th {
+            background-color: #f8f9fa;
+            font-weight: 600;
+            border-bottom: 2px solid #dee2e6;
+        }
+
+        .shelf-1 {
+            background-color: var(--shelf-1-color);
+        }
+
+        .shelf-2 {
+            background-color: var(--shelf-2-color);
+        }
+
+        .shelf-3 {
+            background-color: var(--shelf-3-color);
+        }
+
+        .shelf-4 {
+            background-color: var(--shelf-4-color);
+        }
+
+        .shelf-5 {
+            background-color: var(--shelf-5-color);
+        }
+
+        .shelf-6 {
+            background-color: var(--shelf-6-color);
+        }
+
+        .shelf-7 {
+            background-color: var(--shelf-7-color);
+        }
+
+        .shelf-8 {
+            background-color: var(--shelf-8-color);
+        }
+
+        .shelf-9 {
+            background-color: var(--shelf-9-color);
+        }
+
+        .shelf-10 {
+            background-color: var(--shelf-10-color);
+        }
+
+        .shelf-11 {
+            background-color: var(--shelf-11-color);
+        }
+
+        .shelf-12 {
+            background-color: var(--shelf-12-color);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            #sidebar {
+                width: 80px;
+                text-align: center;
+            }
+
+                #sidebar .sidebar-header h3 {
+                    display: none;
+                }
+
+                #sidebar ul li a {
+                    padding: 15px 10px;
+                    text-align: center;
+                }
+
+                    #sidebar ul li a span {
+                        display: none;
+                    }
+
+                    #sidebar ul li a i {
+                        font-size: 1.5rem;
+                    }
+
+            #content {
+                width: calc(100% - 80px);
+                margin-left: 80px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- panel boczny -->
+    <nav id="sidebar">
+        <div class="sidebar-header">
+            <h3>Budlex</h3>
+        </div>
+
+        <ul class="list-unstyled components">
+            <li>
+                <a href="index.html">
+                    <i class="fas fa-tachometer-alt me-2"></i>
+                    <span>Strona Główna</span>
+                </a>
+            </li>
+            <li>
+                <a href="products.html">
+                    <i class="fas fa-boxes me-2"></i>
+                    <span>Produkty</span>
+                </a>
+            </li>
+            <li class="active">
+                <a href="warehouse.html">
+                    <i class="fas fa-warehouse me-2"></i>
+                    <span>Magazyn</span>
+                </a>
+            </li>
+            <li>
+                <a href="orders.html">
+                    <i class="fas fa-shopping-cart me-2"></i>
+                    <span>Zamówienia</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+
+    <div id="content">
+        <h2 class="mb-4">Magazyn</h2>
+    
+        <div class="mb-3">
+            <label for="shelfFilter" class="form-label">Filtruj według regału:</label>
+            <select class="form-select" id="shelfFilter" onchange="filterByShelf()">
+                <option value="all">Wszystkie</option>
+                <option value="1">Regał 1</option>
+                <option value="2">Regał 2</option>
+                <option value="3">Regał 3</option>
+                <option value="4">Regał 4</option>
+                <option value="5">Regał 5</option>
+                <option value="6">Regał 6</option>
+                <option value="7">Regał 7</option>
+                <option value="8">Regał 8</option>
+                <option value="9">Regał 9</option>
+                <option value="10">Regał 10</option>
+                <option value="11">Regał 11</option>
+                <option value="12">Regał 12</option>
+            </select>
+        </div>
+        
+
+        <div class="card">
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-striped table-hover">
+                        <thead>
+                            <tr>
+                                <th>Produkt</th>
+                                <th>Ilość</th>
+                                <th>Regał</th>
+                                <th>Akcje</th>
+                            </tr>
+                        </thead>
+                        <tbody id="product-list">
+                            <!-- Example products -->
+                            <tr class="shelf-1">
+                                <td>Cement portlandzki CEM I 42,5R</td>
+                                <td>50</td>
+                                <td>Regał 1</td>
+                                <td>
+                                    <button class="btn btn-sm btn-primary" onclick="editProduct(this)"><i class="fas fa-edit"></i></button>
+                                    <button class="btn btn-sm btn-danger" onclick="deleteProduct(this)"><i class="fas fa-trash"></i></button>
+                                </td>
+                            </tr>
+                            <tr class="shelf-2">
+                                <td>Farba lateksowa biała</td>
+                                <td>30</td>
+                                <td>Regał 2</td>
+                                <td>
+                                    <button class="btn btn-sm btn-primary" onclick="editProduct(this)"><i class="fas fa-edit"></i></button>
+                                    <button class="btn btn-sm btn-danger" onclick="deleteProduct(this)"><i class="fas fa-trash"></i></button>
+                                </td>
+                            </tr>
+                           
+                            <tr class="shelf-3">
+                                <td>Styropian fasadowy EPS 040</td>
+                                <td>40</td>
+                                <td>Regał 3</td>
+                                <td>
+                                    <button class="btn btn-sm btn-primary" onclick="editProduct(this)"><i class="fas fa-edit"></i></button>
+                                    <button class="btn btn-sm btn-danger" onclick="deleteProduct(this)"><i class="fas fa-trash"></i></button>
+                                </td>
+                            </tr>
+                            <tr class="shelf-4">
+                                <td>Wiertarka udarowa 1200W</td>
+                                <td>20</td>
+                                <td>Regał 4</td>
+                                <td>
+                                    <button class="btn btn-sm btn-primary" onclick="editProduct(this)"><i class="fas fa-edit"></i></button>
+                                    <button class="btn btn-sm btn-danger" onclick="deleteProduct(this)"><i class="fas fa-trash"></i></button>
+                                </td>
+                            </tr>
+                            <tr class="shelf-5">
+                                <td>Drabina aluminiowa 3x9</td>
+                                <td>15</td>
+                                <td>Regał 5</td>
+                                <td>
+                                    <button class="btn btn-sm btn-primary" onclick="editProduct(this)"><i class="fas fa-edit"></i></button>
+                                    <button class="btn btn-sm btn-danger" onclick="deleteProduct(this)"><i class="fas fa-trash"></i></button>
+                                </td>
+                            </tr>
+                            <tr class="shelf-6">
+                                <td>Szlifierka kątowa 900W</td>
+                                <td>25</td>
+                                <td>Regał 6</td>
+                                <td>
+                                    <button class="btn btn-sm btn-primary" onclick="editProduct(this)"><i class="fas fa-edit"></i></button>
+                                    <button class="btn btn-sm btn-danger" onclick="deleteProduct(this)"><i class="fas fa-trash"></i></button>
+                                </td>
+                            </tr>
+                            <tr class="shelf-7">
+                                <td>Cegła klinkierowa czerwona</td>
+                                <td>100</td>
+                                <td>Regał 7</td>
+                                <td>
+                                    <button class="btn btn-sm btn-primary" onclick="editProduct(this)"><i class="fas fa-edit"></i></button>
+                                    <button class="btn btn-sm btn-danger" onclick="deleteProduct(this)"><i class="fas fa-trash"></i></button>
+                                </td>
+                            </tr>
+                            <tr class="shelf-8">
+                                <td>Lakier bezbarwny półmatowy 5L</td>
+                                <td>10</td>
+                                <td>Regał 8</td>
+                                <td>
+                                    <button class="btn btn-sm btn-primary" onclick="editProduct(this)"><i class="fas fa-edit"></i></button>
+                                    <button class="btn btn-sm btn-danger" onclick="deleteProduct(this)"><i class="fas fa-trash"></i></button>
+                                </td>
+                            </tr>
+                            <tr class="shelf-9">
+                                <td>Klej do płytek elastyczny 25kg</td>
+                                <td>60</td>
+                                <td>Regał 9</td>
+                                <td>
+                                    <button class="btn btn-sm btn-primary" onclick="editProduct(this)"><i class="fas fa-edit"></i></button>
+                                    <button class="btn btn-sm btn-danger" onclick="deleteProduct(this)"><i class="fas fa-trash"></i></button>
+                                </td>
+                            </tr>
+                            <tr class="shelf-10">
+                                <td>Wiertarka udarowa 1000W</td>
+                                <td>35</td>
+                                <td>Regał 10</td>
+                                <td>
+                                    <button class="btn btn-sm btn-primary" onclick="editProduct(this)"><i class="fas fa-edit"></i></button>
+                                    <button class="btn btn-sm btn-danger" onclick="deleteProduct(this)"><i class="fas fa-trash"></i></button>
+                                </td>
+                            </tr>
+                            <tr class="shelf-11">
+                                <td>Wkrętarka sieciowa 800W</td>
+                                <td>45</td>
+                                <td>Regał 11</td>
+                                <td>
+                                    <button class="btn btn-sm btn-primary" onclick="editProduct(this)"><i class="fas fa-edit"></i></button>
+                                    <button class="btn btn-sm btn-danger" onclick="deleteProduct(this)"><i class="fas fa-trash"></i></button>
+                                </td>
+                            </tr>
+                            <tr class="shelf-12">
+                                <td>Wiertarka stołowa 750W</td>
+                                <td>20</td>
+                                <td>Regał 12</td>
+                                <td>
+                                    <button class="btn btn-sm btn-primary" onclick="editProduct(this)"><i class="fas fa-edit"></i></button>
+                                    <button class="btn btn-sm btn-danger" onclick="deleteProduct(this)"><i class="fas fa-trash"></i></button>
+                                </td>
+                            </tr>
+                            <!-- Additional products to make up 80 -->
+                            <tr class="shelf-1">
+                                <td>Płytki ceramiczne Carrara 30x30</td>
+                                <td>50</td>
+                                <td>Regał 1</td>
+                                <td>
+                                    <button class="btn btn-sm btn-primary" onclick="editProduct(this)"><i class="fas fa-edit"></i></button>
+                                    <button class="btn btn-sm btn-danger" onclick="deleteProduct(this)"><i class="fas fa-trash"></i></button>
+                                </td>
+                            </tr>
+                            <tr class="shelf-2">
+                                <td>Rozpuszczalnik uniwersalny</td>
+                                <td>30</td>
+                                <td>Regał 2</td>
+                                <td>
+                                    <button class="btn btn-sm btn-primary" onclick="editProduct(this)"><i class="fas fa-edit"></i></button>
+                                    <button class="btn btn-sm btn-danger" onclick="deleteProduct(this)"><i class="fas fa-trash"></i></button>
+                                </td>
+                            </tr>
+                            <tr class="shelf-3">
+                                <td>Młotek ciesielski 600g</td>
+                                <td>40</td>
+                                <td>Regał 3</td>
+                                <td>
+                                    <button class="btn btn-sm btn-primary" onclick="editProduct(this)"><i class="fas fa-edit"></i></button>
+                                    <button class="btn btn-sm btn-danger" onclick="deleteProduct(this)"><i class="fas fa-trash"></i></button>
+                                </td>
+                            </tr>
+                            <tr class="shelf-4">
+                                <td>Wkrętarka akumulatorowa 18V</td>
+                                <td>20</td>
+                                <td>Regał 4</td>
+                                <td>
+                                    <button class="btn btn-sm btn-primary" onclick="editProduct(this)"><i class="fas fa-edit"></i></button>
+                                    <button class="btn btn-sm btn-danger" onclick="deleteProduct(this)"><i class="fas fa-trash"></i></button>
+                                </td>
+                            </tr>
+                            <tr class="shelf-5">
+                                <td>Tarcza do cięcia metalu 125mm</td>
+                                <td>15</td>
+                                <td>Regał 5</td>
+                                <td>
+                                    <button class="btn btn-sm btn-primary" onclick="editProduct(this)"><i class="fas fa-edit"></i></button>
+                                    <button class="btn btn-sm btn-danger" onclick="deleteProduct(this)"><i class="fas fa-trash"></i></button>
+                                </td>
+                            </tr>
+                            <tr class="shelf-6">
+                                <td>Piła tarczowa 1800W</td>
+                                <td>25</td>
+                                <td>Regał 6</td>
+                                <td>
+                                    <button class="btn btn-sm btn-primary" onclick="editProduct(this)"><i class="fas fa-edit"></i></button>
+                                    <button class="btn btn-sm btn-danger" onclick="deleteProduct(this)"><i class="fas fa-trash"></i></button>
+                                </td>
+                            </tr>
+                            <tr class="shelf-7">
+                                <td>Zaprawa tynkarska 25kg</td>
+                                <td>100</td>
+                                <td>Regał 7</td>
+                                <td>
+                                    <button class="btn btn-sm btn-primary" onclick="editProduct(this)"><i class="fas fa-edit"></i></button>
+                                    <button class="btn btn-sm btn-danger" onclick="deleteProduct(this)"><i class="fas fa-trash"></i></button>
+                                </td>
+                            </tr>
+                            <tr class="shelf-8">
+                                <td>Wełna mineralna 15cm</td>
+                                <td>10</td>
+                                <td>Regał 8</td>
+                                <td>
+                                    <button class="btn btn-sm btn-primary" onclick="editProduct(this)"><i class="fas fa-edit"></i></button>
+                                    <button class="btn btn-sm btn-danger" onclick="deleteProduct(this)"><i class="fas fa-trash"></i></button>
+                                </td>
+                            </tr>
+                            <tr class="shelf-9">
+                                <td>Silikon sanitarny biały 310ml</td>
+                                <td>60</td>
+                                <td>Regał 9</td>
+                                <td>
+                                    <button class="btn btn-sm btn-primary" onclick="editProduct(this)"><i class="fas fa-edit"></i></button>
+                                    <button class="btn btn-sm btn-danger" onclick="deleteProduct(this)"><i class="fas fa-trash"></i></button>
+                                </td>
+                            </tr>
+                            <tr class="shelf-10">
+                                <td>Wiertarka udarowa 1000W</td>
+                                <td>35</td>
+                                <td>Regał 10</td>
+                                <td>
+                                    <button class="btn btn-sm btn-primary" onclick="editProduct(this)"><i class="fas fa-edit"></i></button>
+                                    <button class="btn btn-sm btn-danger" onclick="deleteProduct(this)"><i class="fas fa-trash"></i></button>
+                                </td>
+                            </tr>
+                            <tr class="shelf-11">
+                                <td>Wkrętarka sieciowa 800W</td>
+                                <td>45</td>
+                                <td>Regał 11</td>
+                                <td>
+                                    <button class="btn btn-sm btn-primary" onclick="editProduct(this)"><i class="fas fa-edit"></i></button>
+                                    <button class="btn btn-sm btn-danger" onclick="deleteProduct(this)"><i class="fas fa-trash"></i></button>
+                                </td>
+                            </tr>
+                            <tr class="shelf-12">
+                                <td>Wiertarka stołowa 750W</td>
+                                <td>20</td>
+                                <td>Regał 12</td>
+                                <td>
+                                    <button class="btn btn-sm btn-primary" onclick="editProduct(this)"><i class="fas fa-edit"></i></button>
+                                    <button class="btn btn-sm btn-danger" onclick="deleteProduct(this)"><i class="fas fa-trash"></i></button>
+                                </td>
+                            </tr>
+                           
+                            <tr class="shelf-1">
+                                <td>Płytki ceramiczne Carrara 30x30</td>
+                                <td>50</td>
+                                <td>Regał 1</td>
+                                <td>
+                                    <button class="btn btn-sm btn-primary" onclick="editProduct(this)"><i class="fas fa-edit"></i></button>
+                                    <button class="btn btn-sm btn-danger" onclick="deleteProduct(this)"><i class="fas fa-trash"></i></button>
+                                </td>
+                            </tr>
+                            <tr class="shelf-2">
+                                <td>Rozpuszczalnik uniwersalny</td>
+                                <td>30</td>
+                                <td>Regał 2</td>
+                                <td>
+                                    <button class="btn btn-sm btn-primary" onclick="editProduct(this)"><i class="fas fa-edit"></i></button>
+                                    <button class="btn btn-sm btn-danger" onclick="deleteProduct(this)"><i class="fas fa-trash"></i></button>
+                                </td>
+                            </tr>
+                            <tr class="shelf-3">
+                                <td>Młotek ciesielski 600g</td>
+                                <td>40</td>
+                                <td>Regał 3</td>
+                                <td>
+                                    <button class="btn btn-sm btn-primary" onclick="editProduct(this)"><i class="fas fa-edit"></i></button>
+                                    <button class="btn btn-sm btn-danger" onclick="deleteProduct(this)"><i class="fas fa-trash"></i></button>
+                                </td>
+                            </tr>
+                            <tr class="shelf-4">
+                                <td>Wkrętarka akumulatorowa 18V</td>
+                                <td>20</td>
+                                <td>Regał 4</td>
+                                <td>
+                                    <button class="btn btn-sm btn-primary" onclick="editProduct(this)"><i class="fas fa-edit"></i></button>
+                                    <button class="btn btn-sm btn-danger" onclick="deleteProduct(this)"><i class="fas fa-trash"></i></button>
+                                </td>
+                            </tr>
+                            <tr class="shelf-5">
+                                <td>Tarcza do cięcia metalu 125mm</td>
+                                <td>15</td>
+                                <td>Regał 5</td>
+                                <td>
+                                    <button class="btn btn-sm btn-primary" onclick="editProduct(this)"><i class="fas fa-edit"></i></button>
+                                    <button class="btn btn-sm btn-danger" onclick="deleteProduct(this)"><i class="fas fa-trash"></i></button>
+                                </td>
+                            </tr>
+                            <tr class="shelf-6">
+                                <td>Piła tarczowa 1800W</td>
+                                <td>25</td>
+                                <td>Regał 6</td>
+                                <td>
+                                    <button class="btn btn-sm btn-primary" onclick="editProduct(this)"><i class="fas fa-edit"></i></button>
+                                    <button class="btn btn-sm btn-danger" onclick="deleteProduct(this)"><i class="fas fa-trash"></i></button>
+                                </td>
+                            </tr>
+                            <tr class="shelf-7">
+                                <td>Zaprawa tynkarska 25kg</td>
+                                <td>100</td>
+                                <td>Regał 7</td>
+                                <td>
+                                    <button class="btn btn-sm btn-primary" onclick="editProduct(this)"><i class="fas fa-edit"></i></button>
+                                    <button class="btn btn-sm btn-danger" onclick="deleteProduct(this)"><i class="fas fa-trash"></i></button>
+                                </td>
+                            </tr>
+                            <tr class="shelf-8">
+                                <td>Wełna mineralna 15cm</td>
+                                <td>10</td>
+                                <td>Regał 8</td>
+                                <td>
+                                    <button class="btn btn-sm btn-primary" onclick="editProduct(this)"><i class="fas fa-edit"></i></button>
+                                    <button class="btn btn-sm btn-danger" onclick="deleteProduct(this)"><i class="fas fa-trash"></i></button>
+                                </td>
+                            </tr>
+                            <tr class="shelf-9">
+                                <td>Silikon sanitarny biały 310ml</td>
+                                <td>60</td>
+                                <td>Regał 9</td>
+                                <td>
+                                    <button class="btn btn-sm btn-primary" onclick="editProduct(this)"><i class="fas fa-edit"></i></button>
+                                    <button class="btn btn-sm btn-danger" onclick="deleteProduct(this)"><i class="fas fa-trash"></i></button>
+                                </td>
+                            </tr>
+                            <tr class="shelf-10">
+                                <td>Wiertarka udarowa 1000W</td>
+                                <td>35</td>
+                                <td>Regał 10</td>
+                                <td>
+                                    <button class="btn btn-sm btn-primary" onclick="editProduct(this)"><i class="fas fa-edit"></i></button>
+                                    <button class="btn btn-sm btn-danger" onclick="deleteProduct(this)"><i class="fas fa-trash"></i></button>
+                                </td>
+                            </tr>
+                            <tr class="shelf-11">
+                                <td>Wkrętarka sieciowa 800W</td>
+                                <td>45</td>
+                                <td>Regał 11</td>
+                                <td>
+                                    <button class="btn btn-sm btn-primary" onclick="editProduct(this)"><i class="fas fa-edit"></i></button>
+                                    <button class="btn btn-sm btn-danger" onclick="deleteProduct(this)"><i class="fas fa-trash"></i></button>
+                                </td>
+                            </tr>
+                            <tr class="shelf-12">
+                                <td>Wiertarka stołowa 750W</td>
+                                <td>20</td>
+                                <td>Regał 12</td>
+                                <td>
+                                    <button class="btn btn-sm btn-primary" onclick="editProduct(this)"><i class="fas fa-edit"></i></button>
+                                    <button class="btn btn-sm btn-danger" onclick="deleteProduct(this)"><i class="fas fa-trash"></i></button>
+                                </td>
+                            </tr>
+                            <tr class="shelf-1">
+                                <td>Płytki ceramiczne Carrara 30x30</td>
+                                <td>50</td>
+                                <td>Regał 1</td>
+                                <td>
+                                    <button class="btn btn-sm btn-primary" onclick="editProduct(this)"><i class="fas fa-edit"></i></button>
+                                    <button class="btn btn-sm btn-danger" onclick="deleteProduct(this)"><i class="fas fa-trash"></i></button>
+                                </td>
+                            </tr>
+                            <tr class="shelf-2">
+                                <td>Rozpuszczalnik uniwersalny</td>
+                                <td>30</td>
+                                <td>Regał 2</td>
+                                <td>
+                                    <button class="btn btn-sm btn-primary" onclick="editProduct(this)"><i class="fas fa-edit"></i></button>
+                                    <button class="btn btn-sm btn-danger" onclick="deleteProduct(this)"><i class="fas fa-trash"></i></button>
+                                </td>
+                            </tr>
+                            <tr class="shelf-3">
+                                <td>Młotek ciesielski 600g</td>
+                                <td>40</td>
+                                <td>Regał 3</td>
+                                <td>
+                                    <button class="btn btn-sm btn-primary" onclick="editProduct(this)"><i class="fas fa-edit"></i></button>
+                                    <button class="btn btn-sm btn-danger" onclick="deleteProduct(this)"><i class="fas fa-trash"></i></button>
+                                </td>
+                            </tr>
+                            <tr class="shelf-4">
+                                <td>Wkrętarka akumulatorowa 18V</td>
+                                <td>20</td>
+                                <td>Regał 4</td>
+                                <td>
+                                    <button class="btn btn-sm btn-primary" onclick="editProduct(this)"><i class="fas fa-edit"></i></button>
+                                    <button class="btn btn-sm btn-danger" onclick="deleteProduct(this)"><i class="fas fa-trash"></i></button>
+                                </td>
+                            </tr>
+                            <tr class="shelf-5">
+                                <td>Tarcza do cięcia metalu 125mm</td>
+                                <td>15</td>
+                                <td>Regał 5</td>
+                                <td>
+                                    <button class="btn btn-sm btn-primary" onclick="editProduct(this)"><i class="fas fa-edit"></i></button>
+                                    <button class="btn btn-sm btn-danger" onclick="deleteProduct(this)"><i class="fas fa-trash"></i></button>
+                                </td>
+                            </tr>
+                            <tr class="shelf-6">
+                                <td>Piła tarczowa 1800W</td>
+                                <td>25</td>
+                                <td>Regał 6</td>
+                                <td>
+                                    <button class="btn btn-sm btn-primary" onclick="editProduct(this)"><i class="fas fa-edit"></i></button>
+                                    <button class="btn btn-sm btn-danger" onclick="deleteProduct(this)"><i class="fas fa-trash"></i></button>
+                                </td>
+                            </tr>
+                            <tr class="shelf-7">
+                                <td>Zaprawa tynkarska 25kg</td>
+                                <td>100</td>
+                                <td>Regał 7</td>
+                                <td>
+                                    <button class="btn btn-sm btn-primary" onclick="editProduct(this)"><i class="fas fa-edit"></i></button>
+                                    <button class="btn btn-sm btn-danger" onclick="deleteProduct(this)"><i class="fas fa-trash"></i></button>
+                                </td>
+                            </tr>
+                            <tr class="shelf-8">
+                                <td>Wełna mineralna 15cm</td>
+                                <td>10</td>
+                                <td>Regał 8</td>
+                                <td>
+                                    <button class="btn btn-sm btn-primary" onclick="editProduct(this)"><i class="fas fa-edit"></i></button>
+                                    <button class="btn btn-sm btn-danger" onclick="deleteProduct(this)"><i class="fas fa-trash"></i></button>
+                                </td>
+                            </tr>
+                            <tr class="shelf-9">
+                                <td>Silikon sanitarny biały 310ml</td>
+                                <td>60</td>
+                                <td>Regał 9</td>
+                                <td>
+                                    <button class="btn btn-sm btn-primary" onclick="editProduct(this)"><i class="fas fa-edit"></i></button>
+                                    <button class="btn btn-sm btn-danger" onclick="deleteProduct(this)"><i class="fas fa-trash"></i></button>
+                                </td>
+                            </tr>
+                            <tr class="shelf-10">
+                                <td>Wiertarka udarowa 1000W</td>
+                                <td>35</td>
+                                <td>Regał 10</td>
+                                <td>
+                                    <button class="btn btn-sm btn-primary" onclick="editProduct(this)"><i class="fas fa-edit"></i></button>
+                                    <button class="btn btn-sm btn-danger" onclick="deleteProduct(this)"><i class="fas fa-trash"></i></button>
+                                </td>
+                            </tr>
+                            <tr class="shelf-11">
+                                <td>Wkrętarka sieciowa 800W</td>
+                                <td>45</td>
+                                <td>Regał 11</td>
+                                <td>
+                                    <button class="btn btn-sm btn-primary" onclick="editProduct(this)"><i class="fas fa-edit"></i></button>
+                                    <button class="btn btn-sm btn-danger" onclick="deleteProduct(this)"><i class="fas fa-trash"></i></button>
+                                </td>
+                            </tr>
+                            <tr class="shelf-12">
+                                <td>Wiertarka stołowa 750W</td>
+                                <td>20</td>
+                                <td>Regał 12</td>
+                                <td>
+                                    <button class="btn btn-sm btn-primary" onclick="editProduct(this)"><i class="fas fa-edit"></i></button>
+                                    <button class="btn btn-sm btn-danger" onclick="deleteProduct(this)"><i class="fas fa-trash"></i></button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- edycja produktów -->
+    <div class="modal fade" id="editProductModal" tabindex="-1" aria-labelledby="editProductModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="editProductModalLabel">Edytuj produkt</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="editProductForm">
+                        <div class="mb-3">
+                            <label for="editProductName" class="form-label">Nazwa produktu</label>
+                            <input type="text" class="form-control" id="editProductName" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="editProductQuantity" class="form-label">Ilość</label>
+                            <input type="number" class="form-control" id="editProductQuantity" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="editProductShelf" class="form-label">Regał</label>
+                            <select class="form-select" id="editProductShelf" required>
+                                <option value="1">Regał 1</option>
+                                <option value="2">Regał 2</option>
+                                <option value="3">Regał 3</option>
+                                <option value="4">Regał 4</option>
+                                <option value="5">Regał 5</option>
+                                <option value="6">Regał 6</option>
+                                <option value="7">Regał 7</option>
+                                <option value="8">Regał 8</option>
+                                <option value="9">Regał 9</option>
+                                <option value="10">Regał 10</option>
+                                <option value="11">Regał 11</option>
+                                <option value="12">Regał 12</option>
+                            </select>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Zapisz zmiany</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let editRow = null;
+
+        function editProduct(button) {
+            editRow = button.parentElement.parentElement;
+            document.getElementById('editProductName').value = editRow.children[0].innerText;
+            document.getElementById('editProductQuantity').value = editRow.children[1].innerText;
+            document.getElementById('editProductShelf').value = editRow.className.split('-')[1];
+            var editProductModal = new bootstrap.Modal(document.getElementById('editProductModal'));
+            editProductModal.show();
+        }
+
+        function deleteProduct(button) {
+            var row = button.parentElement.parentElement;
+            row.remove();
+        }
+
+        document.getElementById('editProductForm').addEventListener('submit', function (event) {
+            event.preventDefault();
+            var productName = document.getElementById('editProductName').value;
+            var productQuantity = document.getElementById('editProductQuantity').value;
+            var productShelf = document.getElementById('editProductShelf').value;
+
+            if (editRow) {
+                editRow.children[0].innerText = productName;
+                editRow.children[1].innerText = productQuantity;
+                editRow.children[2].innerText = `Regał ${productShelf}`;
+                editRow.className = `shelf-${productShelf}`;
+            }
+
+            var editProductModal = bootstrap.Modal.getInstance(document.getElementById('editProductModal'));
+            editProductModal.hide();
+        });
+        
+    </script>
+    <script>
+        function filterByShelf() {
+            var filter = document.getElementById('shelfFilter').value;
+            var rows = document.querySelectorAll('#product-list tr');
+    
+            rows.forEach(function(row) {
+                if (filter === 'all') {
+                    row.style.display = '';
+                } else {
+                    if (row.classList.contains('shelf-' + filter)) {
+                        row.style.display = '';
+                    } else {
+                        row.style.display = 'none';
+                    }
+                }
+            });
+        }
+    </script>
+    
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.2.0/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

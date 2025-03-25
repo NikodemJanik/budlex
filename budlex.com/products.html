@@ -1,0 +1,2157 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel Administracyjny - Sklep Budowlany - Produkty</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.2.0/css/bootstrap.min.css">
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --secondary-color: #f39c12;
+            --light-gray: #ecf0f1;
+            --dark-gray: #7f8c8d;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            display: flex;
+            min-height: 100vh;
+            background-color: #f8f9fa;
+        }
+
+        #sidebar {
+            width: 250px;
+            background-color: var(--primary-color);
+            color: white;
+            transition: all 0.3s;
+            position: fixed;
+            height: 100%;
+            overflow-y: auto;
+            z-index: 1000;
+        }
+
+            #sidebar .sidebar-header {
+                padding: 20px;
+                background-color: rgba(0, 0, 0, 0.1);
+            }
+
+            #sidebar ul.components {
+                padding: 20px 0;
+                border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            }
+
+            #sidebar ul li a {
+                padding: 15px;
+                display: block;
+                color: white;
+                text-decoration: none;
+                transition: all 0.3s;
+                border-left: 3px solid transparent;
+            }
+
+                #sidebar ul li a:hover {
+                    background-color: rgba(255, 255, 255, 0.1);
+                    border-left: 3px solid var(--secondary-color);
+                }
+
+            #sidebar ul li.active > a {
+                background-color: rgba(255, 255, 255, 0.1);
+                border-left: 3px solid var(--secondary-color);
+            }
+
+        #content {
+            width: calc(100% - 250px);
+            margin-left: 250px;
+            padding: 20px;
+            transition: all 0.3s;
+        }
+
+        .card {
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+            border: none;
+        }
+
+        .card-header {
+            background-color: white;
+            border-bottom: 1px solid #eee;
+            border-radius: 10px 10px 0 0 !important;
+            padding: 15px 20px;
+            font-weight: 600;
+        }
+
+        .search-box {
+            position: relative;
+            margin-bottom: 20px;
+        }
+
+            .search-box input {
+                border-radius: 20px;
+                padding-left: 40px;
+            }
+
+            .search-box i {
+                position: absolute;
+                left: 15px;
+                top: 50%;
+                transform: translateY(-50%);
+                color: var(--dark-gray);
+            }
+
+        .table-responsive {
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        table thead th {
+            background-color: #f8f9fa;
+            font-weight: 600;
+            border-bottom: 2px solid #dee2e6;
+        }
+
+        .pagination {
+            margin-top: 20px;
+            justify-content: flex-end;
+        }
+
+            .pagination .page-item.active .page-link {
+                background-color: var(--secondary-color);
+                border-color: var(--secondary-color);
+            }
+
+            .pagination .page-link {
+                color: var(--primary-color);
+            }
+
+        .product-badge {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+            .product-badge.small {
+                background-color: #e3f2fd;
+                color: #1976d2;
+            }
+
+            .product-badge.medium {
+                background-color: #fff3e0;
+                color: #e65100;
+            }
+
+            .product-badge.large {
+                background-color: #fbe9e7;
+                color: #bf360c;
+            }
+
+            .product-badge.dangerous {
+                background-color: #ffebee;
+                color: #c62828;
+                margin-left: 5px;
+            }
+
+        .tax-badge {
+            background-color: #e8f5e9;
+            color: #2e7d32;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 0.8rem;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            #sidebar {
+                width: 80px;
+                text-align: center;
+            }
+
+                #sidebar .sidebar-header h3 {
+                    display: none;
+                }
+
+                #sidebar ul li a {
+                    padding: 15px 10px;
+                    text-align: center;
+                }
+
+                    #sidebar ul li a span {
+                        display: none;
+                    }
+
+                    #sidebar ul li a i {
+                        font-size: 1.5rem;
+                    }
+
+            #content {
+                width: calc(100% - 80px);
+                margin-left: 80px;
+            }
+        }
+
+        .filter-panel {
+            background-color: #f8f9fa;
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+
+        .filter-label {
+            font-weight: 600;
+            margin-bottom: 5px;
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <!-- panel boczny -->
+    <nav id="sidebar">
+        <div class="sidebar-header">
+            <h3>Budlex</h3>
+        </div>
+
+        <ul class="list-unstyled components">
+            <li>
+                <a href="index.html">
+                    <i class="fas fa-tachometer-alt me-2"></i>
+                    <span>Strona Główna</span>
+                </a>
+            </li>
+            <li class="active">
+                <a href="products.html">
+                    <i class="fas fa-boxes me-2"></i>
+                    <span>Produkty</span>
+                </a>
+            </li>
+            <li>
+                <a href="warehouse.html">
+                    <i class="fas fa-warehouse me-2"></i>
+                    <span>Magazyn</span>
+                </a>
+            </li>
+            <li>
+                <a href="orders.html">
+                    <i class="fas fa-shopping-cart me-2"></i>
+                    <span>Zamówienia</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+
+
+    <div id="content">
+        <h2 class="mb-4">Lista produktów</h2>
+
+        <div class="card">
+            <div class="card-body">
+                <div class="row mb-4">
+                    <div class="col-md-4">
+                        <div class="search-box">
+                            <i class="fas fa-search"></i>
+                            <input type="text" class="form-control" placeholder="Szukaj produktu...">
+                        </div>
+                    </div>
+                    <div class="col-md-8 text-end">
+                        <button class="btn btn-primary" onclick="showAddProductPopup()">
+                            <i class="fas fa-plus me-2"></i> Dodaj produkt
+                        </button>
+                        <button class="btn btn-outline-secondary ms-2">
+                            <i class="fas fa-file-export me-2"></i> Export
+                        </button>
+                        <button class="btn btn-outline-secondary ms-2">
+                            <i class="fas fa-filter me-2"></i> Filtry
+                        </button>
+                    </div>
+                </div>
+
+                <div class="filter-panel mb-4" style="display: none;">
+                    <div class="row">
+                        <div class="col-md-3">
+                            <label class="filter-label">Kategoria</label>
+                            <select class="form-select">
+                                <option value="">Wszystkie</option>
+                                <option value="Materiały budowlane">Materiały budowlane</option>
+                                <option value="Narzędzia">Narzędzia</option>
+                                <option value="Farby i lakiery">Farby i lakiery</option>
+                                <option value="Elektryka">Elektryka</option>
+                                <option value="Hydraulika">Hydraulika</option>
+                                <option value="Izolacje">Izolacje</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="filter-label">Rozmiar</label>
+                            <select class="form-select">
+                                <option value="">Wszystkie</option>
+                                <option value="Mały">Mały</option>
+                                <option value="Średni">Średni</option>
+                                <option value="Duży">Duży</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="filter-label">Status magazynowy</label>
+                            <select class="form-select">
+                                <option value="">Wszystkie</option>
+                                <option value="W magazynie">W magazynie</option>
+                                <option value="Niski stan">Niski stan</option>
+                                <option value="Brak">Brak na stanie</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="filter-label">Stawka VAT</label>
+                            <select class="form-select">
+                                <option value="">Wszystkie</option>
+                                <option value="0">0%</option>
+                                <option value="5">5%</option>
+                                <option value="8">8%</option>
+                                <option value="23">23%</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="table-responsive">
+                    <table class="table table-striped table-hover">
+                        <thead>
+                            <tr>
+                                <th>Nazwa produktu</th>
+                                <th>Numer seryjny</th>
+                                <th>Opis</th>
+                                <th>Waga</th>
+                                <th>Rozmiar</th>
+                                <th>Cena netto</th>
+                                <th>VAT</th>
+                                <th>Cena brutto</th>
+                                <th>Ilość</th>
+                                <th>Akcje</th>
+                            </tr>
+                        </thead>
+                        <tbody id="product-list">
+                            <!-- 40 przykładowych produktów -->
+                            <tr>
+                                <td>Cement portlandzki CEM I 42,5R</td>
+                                <td>CEM-PORT-425R</td>
+                                <td>Cement portlandzki do zastosowań ogólnobudowlanych</td>
+                                <td>25 kg</td>
+                                <td><span class="product-badge medium">Średni</span></td>
+                                <td>24.39 zł</td>
+                                <td><span class="tax-badge">23%</span></td>
+                                <td>30.00 zł</td>
+                                <td>128 szt.</td>
+                                <td>
+                                    <button class="btn btn-sm btn-primary"><i class="fas fa-edit"></i></button>
+                                    <button class="btn btn-sm btn-danger"><i class="fas fa-trash"></i></button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Płytki ceramiczne Carrara 30x30</td>
+                                <td>PŁY-CAR-3030</td>
+                                <td>Płytki ceramiczne białe, imitacja marmuru</td>
+                                <td>1.5 kg</td>
+                                <td><span class="product-badge small">Mały</span></td>
+                                <td>13.01 zł</td>
+                                <td><span class="tax-badge">23%</span></td>
+                                <td>16.00 zł</td>
+                                <td>350 szt.</td>
+                                <td>
+                                    <button class="btn btn-sm btn-primary"><i class="fas fa-edit"></i></button>
+                                    <button class="btn btn-sm btn-danger"><i class="fas fa-trash"></i></button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Farba lateksowa biała</td>
+                                <td>FAR-LAT-B10</td>
+                                <td>Farba lateksowa wewnętrzna, odporna na szorowanie</td>
+                                <td>10 L</td>
+                                <td><span class="product-badge medium">Średni</span></td>
+                                <td>56.91 zł</td>
+                                <td><span class="tax-badge">23%</span></td>
+                                <td>70.00 zł</td>
+                                <td>42 szt.</td>
+                                <td>
+                                    <button class="btn btn-sm btn-primary"><i class="fas fa-edit"></i></button>
+                                    <button class="btn btn-sm btn-danger"><i class="fas fa-trash"></i></button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Rozpuszczalnik uniwersalny</td>
+                                <td>ROZ-UNI-05</td>
+                                <td>Rozpuszczalnik do farb i lakierów</td>
+                                <td>5 L</td>
+                                <td><span class="product-badge small">Mały</span></td>
+                                <td>16.26 zł</td>
+                                <td><span class="tax-badge">23%</span></td>
+                                <td>20.00 zł</td>
+                                <td>45 szt.</td>
+                                <td>
+                                    <button class="btn btn-sm btn-primary"><i class="fas fa-edit"></i></button>
+                                    <button class="btn btn-sm btn-danger"><i class="fas fa-trash"></i></button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Styropian fasadowy EPS 040</td>
+                                <td>STY-FAS-040</td>
+                                <td>Styropian do ociepleń fasad, grubość 10cm</td>
+                                <td>3 kg</td>
+                                <td><span class="product-badge large">Duży</span></td>
+                                <td>8.13 zł</td>
+                                <td><span class="tax-badge">23%</span></td>
+                                <td>10.00 zł</td>
+                                <td>120 szt.</td>
+                                <td>
+                                    <button class="btn btn-sm btn-primary"><i class="fas fa-edit"></i></button>
+                                    <button class="btn btn-sm btn-danger"><i class="fas fa-trash"></i></button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Młotek ciesielski 600g</td>
+                                <td>ML-CI-600</td>
+                                <td>Młotek ciesielski z trzonkiem drewnianym</td>
+                                <td>0.8 kg</td>
+                                <td><span class="product-badge small">Mały</span></td>
+                                <td>32.52 zł</td>
+                                <td><span class="tax-badge">23%</span></td>
+                                <td>40.00 zł</td>
+                                <td>25 szt.</td>
+                                <td>
+                                    <button class="btn btn-sm btn-primary"><i class="fas fa-edit"></i></button>
+                                    <button class="btn btn-sm btn-danger"><i class="fas fa-trash"></i></button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Wiertarka udarowa 1200W</td>
+                                <td>WI-UD-1200</td>
+                                <td>Wiertarka udarowa z regulacją obrotów</td>
+                                <td>3.5 kg</td>
+                                <td><span class="product-badge medium">Średni</span></td>
+                                <td>243.90 zł</td>
+                                <td><span class="tax-badge">23%</span></td>
+                                <td>300.00 zł</td>
+                                <td>12 szt.</td>
+                                <td>
+                                    <button class="btn btn-sm btn-primary"><i class="fas fa-edit"></i></button>
+                                    <button class="btn btn-sm btn-danger"><i class="fas fa-trash"></i></button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Płyta OSB-3 22mm</td>
+                                <td>OSB-3-22</td>
+                                <td>Płyta OSB wodoodporna, grubość 22mm</td>
+                                <td>32 kg</td>
+                                <td><span class="product-badge large">Duży</span></td>
+                                <td>89.43 zł</td>
+                                <td><span class="tax-badge">23%</span></td>
+                                <td>110.00 zł</td>
+                                <td>75 szt.</td>
+                                <td>
+                                    <button class="btn btn-sm btn-primary"><i class="fas fa-edit"></i></button>
+                                    <button class="btn btn-sm btn-danger"><i class="fas fa-trash"></i></button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Papa termozgrzewalna PV250</td>
+                                <td>PAP-TZ-PV250</td>
+                                <td>Papa nawierzchniowa, grubość 5.2mm</td>
+                                <td>37 kg</td>
+                                <td><span class="product-badge large">Duży</span></td>
+                                <td>146.34 zł</td>
+                                <td><span class="tax-badge">23%</span></td>
+                                <td>180.00 zł</td>
+                                <td>24 szt.</td>
+                                <td>
+                                    <button class="btn btn-sm btn-primary"><i class="fas fa-edit"></i></button>
+                                    <button class="btn btn-sm btn-danger"><i class="fas fa-trash"></i></button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Gwoździe budowlane 5cm</td>
+                                <td>GWO-BUD-5CM</td>
+                                <td>Gwoździe budowlane ocynkowane, długość 5cm</td>
+                                <td>1 kg</td>
+                                <td><span class="product-badge small">Mały</span></td>
+                                <td>8.13 zł</td>
+                                <td><span class="tax-badge">23%</span></td>
+                                <td>10.00 zł</td>
+                                <td>500 szt.</td>
+                                <td>
+                                    <button class="btn btn-sm btn-primary"><i class="fas fa-edit"></i></button>
+                                    <button class="btn btn-sm btn-danger"><i class="fas fa-trash"></i></button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Wkręty samowiercące 4x30mm</td>
+                                <td>WKR-SAM-4X30</td>
+                                <td>Wkręty samowiercące do metalu, rozmiar 4x30mm</td>
+                                <td>0.5 kg</td>
+                                <td><span class="product-badge small">Mały</span></td>
+                                <td>6.50 zł</td>
+                                <td><span class="tax-badge">23%</span></td>
+                                <td>8.00 zł</td>
+                                <td>1000 szt.</td>
+                                <td>
+                                    <button class="btn btn-sm btn-primary"><i class="fas fa-edit"></i></button>
+                                    <button class="btn btn-sm btn-danger"><i class="fas fa-trash"></i></button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Rura stalowa 2m</td>
+                                <td>RUR-STA-2M</td>
+                                <td>Rura stalowa ocynkowana, długość 2m</td>
+                                <td>10 kg</td>
+                                <td><span class="product-badge large">Duży</span></td>
+                                <td>40.65 zł</td>
+                                <td><span class="tax-badge">23%</span></td>
+                                <td>50.00 zł</td>
+                                <td>50 szt.</td>
+                                <td>
+                                    <button class="btn btn-sm btn-primary"><i class="fas fa-edit"></i></button>
+                                    <button class="btn btn-sm btn-danger"><i class="fas fa-trash"></i></button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Siatka ogrodzeniowa 1.5x10m</td>
+                                <td>SIA-OGR-1.5X10</td>
+                                <td>Siatka ogrodzeniowa ocynkowana, wymiary 1.5x10m</td>
+                                <td>15 kg</td>
+                                <td><span class="product-badge large">Duży</span></td>
+                                <td>81.30 zł</td>
+                                <td><span class="tax-badge">23%</span></td>
+                                <td>100.00 zł</td>
+                                <td>20 szt.</td>
+                                <td>
+                                    <button class="btn btn-sm btn-primary"><i class="fas fa-edit"></i></button>
+                                    <button class="btn btn-sm btn-danger"><i class="fas fa-trash"></i></button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Wkrętarka akumulatorowa 24V</td>
+                                <td>WKR-AKU-24V</td>
+                                <td>Wkrętarka akumulatorowa z trzema bateriami</td>
+                                <td>1.5 kg</td>
+                                <td><span class="product-badge small">Mały</span></td>
+                                <td>325.20 zł</td>
+                                <td><span class="tax-badge">23%</span></td>
+                                <td>400.00 zł</td>
+                                <td>10 szt.</td>
+                                <td>
+                                    <button class="btn btn-sm btn-primary"><i class="fas fa-edit"></i></button>
+                                    <button class="btn btn-sm btn-danger"><i class="fas fa-trash"></i></button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Wiertarka stołowa 750W</td>
+                                <td>WIE-STO-750</td>
+                                <td>Wiertarka stołowa z regulacją obrotów</td>
+                                <td>12 kg</td>
+                                <td><span class="product-badge large">Duży</span></td>
+                                <td>487.80 zł</td>
+                                <td><span class="tax-badge">23%</span></td>
+                                <td>600.00 zł</td>
+                                <td>8 szt.</td>
+                                <td>
+                                    <button class="btn btn-sm btn-primary"><i class="fas fa-edit"></i></button>
+                                    <button class="btn btn-sm btn-danger"><i class="fas fa-trash"></i></button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Wiertło do betonu 12mm</td>
+                                <td>WIE-BET-12</td>
+                                <td>Wiertło do betonu o średnicy 12mm</td>
+                                <td>0.3 kg</td>
+                                <td><span class="product-badge small">Mały</span></td>
+                                <td>8.13 zł</td>
+                                <td><span class="tax-badge">23%</span></td>
+                                <td>10.00 zł</td>
+                                <td>150 szt.</td>
+                                <td>
+                                    <button class="btn btn-sm btn-primary"><i class="fas fa-edit"></i></button>
+                                    <button class="btn btn-sm btn-danger"><i class="fas fa-trash"></i></button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Wiertarka sieciowa 800W</td>
+                                <td>WKR-SIE-800</td>
+                                <td>Wkrętarka sieciowa z regulacją obrotów</td>
+                                <td>2 kg</td>
+                                <td><span class="product-badge medium">Średni</span></td>
+                                <td>243.90 zł</td>
+                                <td><span class="tax-badge">23%</span></td>
+                                <td>300.00 zł</td>
+                                <td>20 szt.</td>
+                                <td>
+                                    <button class="btn btn-sm btn-primary"><i class="fas fa-edit"></i></button>
+                                    <button class="btn btn-sm btn-danger"><i class="fas fa-trash"></i></button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Wiertarka udarowa 1000W</td>
+                                <td>WIE-UD-1000</td>
+                                <td>Wiertarka udarowa z regulacją obrotów</td>
+                                <td>3 kg</td>
+                                <td><span class="product-badge medium">Średni</span></td>
+                                <td>243.90 zł</td>
+                                <td><span class="tax-badge">23%</span></td>
+                                <td>300.00 zł</td>
+                                <td>15 szt.</td>
+                                <td>
+                                    <button class="btn btn-sm btn-primary"><i class="fas fa-edit"></i></button>
+                                    <button class="btn btn-sm btn-danger"><i class="fas fa-trash"></i></button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Wiertło do drewna 8mm</td>
+                                <td>WIE-DRE-8</td>
+                                <td>Wiertło do drewna o średnicy 8mm</td>
+                                <td>0.1 kg</td>
+                                <td><span class="product-badge small">Mały</span></td>
+                                <td>4.07 zł</td>
+                                <td><span class="tax-badge">23%</span></td>
+                                <td>5.00 zł</td>
+                                <td>300 szt.</td>
+                                <td>
+                                    <button class="btn btn-sm btn-primary"><i class="fas fa-edit"></i></button>
+                                    <button class="btn btn-sm btn-danger"><i class="fas fa-trash"></i></button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Wkrętarka akumulatorowa 12V</td>
+                                <td>WKR-AKU-12V</td>
+                                <td>Wkrętarka akumulatorowa z jedną baterią</td>
+                                <td>1 kg</td>
+                                <td><span class="product-badge small">Mały</span></td>
+                                <td>162.60 zł</td>
+                                <td><span class="tax-badge">23%</span></td>
+                                <td>200.00 zł</td>
+                                <td>20 szt.</td>
+                                <td>
+                                    <button class="btn btn-sm btn-primary"><i class="fas fa-edit"></i></button>
+                                    <button class="btn btn-sm btn-danger"><i class="fas fa-trash"></i></button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Wiertarka stołowa 500W</td>
+                                <td>WIE-STO-500</td>
+                                <td>Wiertarka stołowa z regulacją obrotów</td>
+                                <td>10 kg</td>
+                                <td><span class="product-badge large">Duży</span></td>
+                                <td>406.50 zł</td>
+                                <td><span class="tax-badge">23%</span></td>
+                                <td>500.00 zł</td>
+                                <td>10 szt.</td>
+                                <td>
+                                    <button class="btn btn-sm btn-primary"><i class="fas fa-edit"></i></button>
+                                    <button class="btn btn-sm btn-danger"><i class="fas fa-trash"></i></button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Wiertło do metalu 6mm</td>
+                                <td>WIE-MET-6</td>
+                                <td>Wiertło do metalu o średnicy 6mm</td>
+                                <td>0.1 kg</td>
+                                <td><span class="product-badge small">Mały</span></td>
+                                <td>4.07 zł</td>
+                                <td><span class="tax-badge">23%</span></td>
+                                <td>5.00 zł</td>
+                                <td>300 szt.</td>
+                                <td>
+                                    <button class="btn btn-sm btn-primary"><i class="fas fa-edit"></i></button>
+                                    <button class="btn btn-sm btn-danger"><i class="fas fa-trash"></i></button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Wkrętarka sieciowa 600W</td>
+                                <td>WKR-SIE-600</td>
+                                <td>Wkrętarka sieciowa z regulacją obrotów</td>
+                                <td>1.8 kg</td>
+                                <td><span class="product-badge medium">Średni</span></td>
+                                <td>162.60 zł</td>
+                                <td><span class="tax-badge">23%</span></td>
+                                <td>200.00 zł</td>
+                                <td>25 szt.</td>
+                                <td>
+                                    <button class="btn btn-sm btn-primary"><i class="fas fa-edit"></i></button>
+                                    <button class="btn btn-sm btn-danger"><i class="fas fa-trash"></i></button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Szpachla 150mm</td>
+                                <td>SZP-150</td>
+                                <td>Szpachla do gładzi, szerokość 150mm</td>
+                                <td>0.3 kg</td>
+                                <td><span class="product-badge small">Mały</span></td>
+                                <td>8.13 zł</td>
+                                <td><span class="tax-badge">23%</span></td>
+                                <td>10.00 zł</td>
+                                <td>100 szt.</td>
+                                <td>
+                                    <button class="btn btn-sm btn-primary"><i class="fas fa-edit"></i></button>
+                                    <button class="btn btn-sm btn-danger"><i class="fas fa-trash"></i></button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Piła łańcuchowa 2000W</td>
+                                <td>PIŁ-ŁAŃ-2000</td>
+                                <td>Piła łańcuchowa elektryczna</td>
+                                <td>5 kg</td>
+                                <td><span class="product-badge large">Duży</span></td>
+                                <td>406.50 zł</td>
+                                <td><span class="tax-badge">23%</span></td>
+                                <td>500.00 zł</td>
+                                <td>15 szt.</td>
+                                <td>
+                                    <button class="btn btn-sm btn-primary"><i class="fas fa-edit"></i></button>
+                                    <button class="btn btn-sm btn-danger"><i class="fas fa-trash"></i></button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Wiertarka udarowa 800W</td>
+                                <td>WIE-UD-800</td>
+                                <td>Wiertarka udarowa z regulacją obrotów</td>
+                                <td>2.5 kg</td>
+                                <td><span class="product-badge medium">Średni</span></td>
+                                <td>162.60 zł</td>
+                                <td><span class="tax-badge">23%</span></td>
+                                <td>200.00 zł</td>
+                                <td>30 szt.</td>
+                                <td>
+                                    <button class="btn btn-sm btn-primary"><i class="fas fa-edit"></i></button>
+                                    <button class="btn btn-sm btn-danger"><i class="fas fa-trash"></i></button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Łopata do śniegu</td>
+                                <td>ŁOP-SNIEG</td>
+                                <td>Łopata do odśnieżania</td>
+                                <td>1.5 kg</td>
+                                <td><span class="product-badge small">Mały</span></td>
+                                <td>24.39 zł</td>
+                                <td><span class="tax-badge">23%</span></td>
+                                <td>30.00 zł</td>
+                                <td>80 szt.</td>
+                                <td>
+                                    <button class="btn btn-sm btn-primary"><i class="fas fa-edit"></i></button>
+                                    <button class="btn btn-sm btn-danger"><i class="fas fa-trash"></i></button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Wąż ogrodowy 20m</td>
+                                <td>WĄŻ-OGR-20</td>
+                                <td>Wąż ogrodowy, długość 20m</td>
+                                <td>2 kg</td>
+                                <td><span class="product-badge medium">Średni</span></td>
+                                <td>32.52 zł</td>
+                                <td><span class="tax-badge">23%</span></td>
+                                <td>40.00 zł</td>
+                                <td>60 szt.</td>
+                                <td>
+                                    <button class="btn btn-sm btn-primary"><i class="fas fa-edit"></i></button>
+                                    <button class="btn btn-sm btn-danger"><i class="fas fa-trash"></i></button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Taśma malarska 50m</td>
+                                <td>TAS-MAL-50</td>
+                                <td>Taśma malarska do zabezpieczeń, długość 50m</td>
+                                <td>0.2 kg</td>
+                                <td><span class="product-badge small">Mały</span></td>
+                                <td>8.13 zł</td>
+                                <td><span class="tax-badge">23%</span></td>
+                                <td>10.00 zł</td>
+                                <td>300 szt.</td>
+                                <td>
+                                    <button class="btn btn-sm btn-primary"><i class="fas fa-edit"></i></button>
+                                    <button class="btn btn-sm btn-danger"><i class="fas fa-trash"></i></button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Folia budowlana 4x25m</td>
+                                <td>FOL-BUD-4X25</td>
+                                <td>Folia budowlana do zabezpieczeń, wymiary 4x25m</td>
+                                <td>5 kg</td>
+                                <td><span class="product-badge medium">Średni</span></td>
+                                <td>24.39 zł</td>
+                                <td><span class="tax-badge">23%</span></td>
+                                <td>30.00 zł</td>
+                                <td>50 szt.</td>
+                                <td>
+                                    <button class="btn btn-sm btn-primary"><i class="fas fa-edit"></i></button>
+                                    <button class="btn btn-sm btn-danger"><i class="fas fa-trash"></i></button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Wkręty do drewna 4x50mm</td>
+                                <td>WKR-DRE-4X50</td>
+                                <td>Wkręty do drewna, rozmiar 4x50mm</td>
+                                <td>0.1 kg</td>
+                                <td><span class="product-badge small">Mały</span></td>
+                                <td>4.07 zł</td>
+                                <td><span class="tax-badge">23%</span></td>
+                                <td>5.00 zł</td>
+                                <td>1000 szt.</td>
+                                <td>
+                                    <button class="btn btn-sm btn-primary"><i class="fas fa-edit"></i></button>
+                                    <button class="btn btn-sm btn-danger"><i class="fas fa-trash"></i></button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Folia budowlana 4x25m</td>
+                                <td>FOL-BUD-4X25</td>
+                                <td>Folia budowlana do zabezpieczeń, wymiary 4x25m</td>
+                                <td>5 kg</td>
+                                <td><span class="product-badge medium">Średni</span></td>
+                                <td>24.39 zł</td>
+                                <td><span class="tax-badge">23%</span></td>
+                                <td>30.00 zł</td>
+                                <td>50 szt.</td>
+                                <td>
+                                    <button class="btn btn-sm btn-primary"><i class="fas fa-edit"></i></button>
+                                    <button class="btn btn-sm btn-danger"><i class="fas fa-trash"></i></button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Taśma malarska 50m</td>
+                                <td>TAS-MAL-50</td>
+                                <td>Taśma malarska do zabezpieczeń, długość 50m</td>
+                                <td>0.2 kg</td>
+                                <td><span class="product-badge small">Mały</span></td>
+                                <td>8.13 zł</td>
+                                <td><span class="tax-badge">23%</span></td>
+                                <td>10.00 zł</td>
+                                <td>300 szt.</td>
+                                <td>
+                                    <button class="btn btn-sm btn-primary"><i class="fas fa-edit"></i></button>
+                                    <button class="btn btn-sm btn-danger"><i class="fas fa-trash"></i></button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Wąż ogrodowy 20m</td>
+                                <td>WĄŻ-OGR-20</td>
+                                <td>Wąż ogrodowy, długość 20m</td>
+                                <td>2 kg</td>
+                                <td><span class="product-badge medium">Średni</span></td>
+                                <td>32.52 zł</td>
+                                <td><span class="tax-badge">23%</span></td>
+                                <td>40.00 zł</td>
+                                <td>60 szt.</td>
+                                <td>
+                                    <button class="btn btn-sm btn-primary"><i class="fas fa-edit"></i></button>
+                                    <button class="btn btn-sm btn-danger"><i class="fas fa-trash"></i></button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Łopata do śniegu</td>
+                                <td>ŁOP-SNIEG</td>
+                                <td>Łopata do odśnieżania</td>
+                                <td>1.5 kg</td>
+                                <td><span class="product-badge small">Mały</span></td>
+                                <td>24.39 zł</td>
+                                <td><span class="tax-badge">23%</span></td>
+                                <td>30.00 zł</td>
+                                <td>80 szt.</td>
+                                <td>
+                                    <button class="btn btn-sm btn-primary"><i class="fas fa-edit"></i></button>
+                                    <button class="btn btn-sm btn-danger"><i class="fas fa-trash"></i></button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Wiertarka udarowa 800W</td>
+                                <td>WIE-UD-800</td>
+                                <td>Wiertarka udarowa z regulacją obrotów</td>
+                                <td>2.5 kg</td>
+                                <td><span class="product-badge medium">Średni</span></td>
+                                <td>162.60 zł</td>
+                                <td><span class="tax-badge">23%</span></td>
+                                <td>200.00 zł</td>
+                                <td>30 szt.</td>
+                                <td>
+                                    <button class="btn btn-sm btn-primary"><i class="fas fa-edit"></i></button>
+                                    <button class="btn btn-sm btn-danger"><i class="fas fa-trash"></i></button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Piła łańcuchowa 2000W</td>
+                                <td>PIŁ-ŁAŃ-2000</td>
+                                <td>Piła łańcuchowa elektryczna</td>
+                                <td>5 kg</td>
+                                <td><span class="product-badge large">Duży</span></td>
+                                <td>406.50 zł</td>
+                                <td><span class="tax-badge">23%</span></td>
+                                <td>500.00 zł</td>
+                                <td>15 szt.</td>
+                                <td>
+                                    <button class="btn btn-sm btn-primary"><i class="fas fa-edit"></i></button>
+                                    <button class="btn btn-sm btn-danger"><i class="fas fa-trash"></i></button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Szpachla 150mm</td>
+                                <td>SZP-150</td>
+                                <td>Szpachla do gładzi, szerokość 150mm</td>
+                                <td>0.3 kg</td>
+                                <td><span class="product-badge small">Mały</span></td>
+                                <td>8.13 zł</td>
+                                <td><span class="tax-badge">23%</span></td>
+                                <td>10.00 zł</td>
+                                <td>100 szt.</td>
+                                <td>
+                                    <button class="btn btn-sm btn-primary"><i class="fas fa-edit"></i></button>
+                                    <button class="btn btn-sm btn-danger"><i class="fas fa-trash"></i></button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Wkrętarka sieciowa 600W</td>
+                                <td>WKR-SIE-600</td>
+                                <td>Wkrętarka sieciowa z regulacją obrotów</td>
+                                <td>1.8 kg</td>
+                                <td><span class="product-badge medium">Średni</span></td>
+                                <td>162.60 zł</td>
+                                <td><span class="tax-badge">23%</span></td>
+                                <td>200.00 zł</td>
+                                <td>25 szt.</td>
+                                <td>
+                                    <button class="btn btn-sm btn-primary"><i class="fas fa-edit"></i></button>
+                                    <button class="btn btn-sm btn-danger"><i class="fas fa-trash"></i></button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Wiertło do metalu 6mm</td>
+                                <td>WIE-MET-6</td>
+                                <td>Wiertło do metalu o średnicy 6mm</td>
+                                <td>0.1 kg</td>
+                                <td><span class="product-badge small">Mały</span></td>
+                                <td>4.07 zł</td>
+                                <td><span class="tax-badge">23%</span></td>
+                                <td>5.00 zł</td>
+                                <td>300 szt.</td>
+                                <td>
+                                    <button class="btn btn-sm btn-primary"><i class="fas fa-edit"></i></button>
+                                    <button class="btn btn-sm btn-danger"><i class="fas fa-trash"></i></button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Wiertarka stołowa 500W</td>
+                                <td>WIE-STO-500</td>
+                                <td>Wiertarka stołowa z regulacją obrotów</td>
+                                <td>10 kg</td>
+                                <td><span class="product-badge large">Duży</span></td>
+                                <td>406.50 zł</td>
+                                <td><span class="tax-badge">23%</span></td>
+                                <td>500.00 zł</td>
+                                <td>10 szt.</td>
+                                <td>
+                                    <button class="btn btn-sm btn-primary"><i class="fas fa-edit"></i></button>
+                                    <button class="btn btn-sm btn-danger"><i class="fas fa-trash"></i></button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Wkrętarka akumulatorowa 12V</td>
+                                <td>WKR-AKU-12V</td>
+                                <td>Wkrętarka akumulatorowa z jedną baterią</td>
+                                <td>1 kg</td>
+                                <td><span class="product-badge small">Mały</span></td>
+                                <td>162.60 zł</td>
+                                <td><span class="tax-badge">23%</span></td>
+                                <td>200.00 zł</td>
+                                <td>20 szt.</td>
+                                <td>
+                                    <button class="btn btn-sm btn-primary"><i class="fas fa-edit"></i></button>
+                                    <button class="btn btn-sm btn-danger"><i class="fas fa-trash"></i></button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Wiertło do drewna 8mm</td>
+                                <td>WIE-DRE-8</td>
+                                <td>Wiertło do drewna o średnicy 8mm</td>
+                                <td>0.1 kg</td>
+                                <td><span class="product-badge small">Mały</span></td>
+                                <td>4.07 zł</td>
+                                <td><span class="tax-badge">23%</span></td>
+                                <td>5.00 zł</td>
+                                <td>300 szt.</td>
+                                <td>
+                                    <button class="btn btn-sm btn-primary"><i class="fas fa-edit"></i></button>
+                                    <button class="btn btn-sm btn-danger"><i class="fas fa-trash"></i></button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Wiertarka udarowa 1000W</td>
+                                <td>WIE-UD-1000</td>
+                                <td>Wiertarka udarowa z regulacją obrotów</td>
+                                <td>3 kg</td>
+                                <td><span class="product-badge medium">Średni</span></td>
+                                <td>243.90 zł</td>
+                                <td><span class="tax-badge">23%</span></td>
+                                <td>300.00 zł</td>
+                                <td>15 szt.</td>
+                                <td>
+                                    <button class="btn btn-sm btn-primary"><i class="fas fa-edit"></i></button>
+                                    <button class="btn btn-sm btn-danger"><i class="fas fa-trash"></i></button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Wkrętarka sieciowa 800W</td>
+                                <td>WKR-SIE-800</td>
+                                <td>Wkrętarka sieciowa z regulacją obrotów</td>
+                                <td>2 kg</td>
+                                <td><span class="product-badge medium">Średni</span></td>
+                                <td>243.90 zł</td>
+                                <td><span class="tax-badge">23%</span></td>
+                                <td>300.00 zł</td>
+                                <td>20 szt.</td>
+                                <td>
+                                    <button class="btn btn-sm btn-primary"><i class="fas fa-edit"></i></button>
+                                    <button class="btn btn-sm btn-danger"><i class="fas fa-trash"></i></button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Wiertło do betonu 12mm</td>
+                                <td>WIE-BET-12</td>
+                                <td>Wiertło do betonu o średnicy 12mm</td>
+                                <td>0.3 kg</td>
+                                <td><span class="product-badge small">Mały</span></td>
+                                <td>8.13 zł</td>
+                                <td><span class="tax-badge">23%</span></td>
+                                <td>10.00 zł</td>
+                                <td>150 szt.</td>
+                                <td>
+                                    <button class="btn btn-sm btn-primary"><i class="fas fa-edit"></i></button>
+                                    <button class="btn btn-sm btn-danger"><i class="fas fa-trash"></i></button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Wiertarka stołowa 750W</td>
+                                <td>WIE-STO-750</td>
+                                <td>Wiertarka stołowa z regulacją obrotów</td>
+                                <td>12 kg</td>
+                                <td><span class="product-badge large">Duży</span></td>
+                                <td>487.80 zł</td>
+                                <td><span class="tax-badge">23%</span></td>
+                                <td>600.00 zł</td>
+                                <td>8 szt.</td>
+                                <td>
+                                    <button class="btn btn-sm btn-primary"><i class="fas fa-edit"></i></button>
+                                    <button class="btn btn-sm btn-danger"><i class="fas fa-trash"></i></button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Wkrętarka akumulatorowa 24V</td>
+                                <td>WKR-AKU-24V</td>
+                                <td>Wkrętarka akumulatorowa z trzema bateriami</td>
+                                <td>1.5 kg</td>
+                                <td><span class="product-badge small">Mały</span></td>
+                                <td>325.20 zł</td>
+                                <td><span class="tax-badge">23%</span></td>
+                                <td>400.00 zł</td>
+                                <td>10 szt.</td>
+                                <td>
+                                    <button class="btn btn-sm btn-primary"><i class="fas fa-edit"></i></button>
+                                    <button class="btn btn-sm btn-danger"><i class="fas fa-trash"></i></button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Gwoździe budowlane 5cm</td>
+                                <td>GWO-BUD-5CM</td>
+                                <td>Gwoździe budowlane ocynkowane, długość 5cm</td>
+                                <td>1 kg</td>
+                                <td><span class="product-badge small">Mały</span></td>
+                                <td>8.13 zł</td>
+                                <td><span class="tax-badge">23%</span></td>
+                                <td>10.00 zł</td>
+                                <td>500 szt.</td>
+                                <td>
+                                    <button class="btn btn-sm btn-primary"><i class="fas fa-edit"></i></button>
+                                    <button class="btn btn-sm btn-danger"><i class="fas fa-trash"></i></button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Wkręty samowiercące 4x30mm</td>
+                                <td>WKR-SAM-4X30</td>
+                                <td>Wkręty samowiercące do metalu, rozmiar 4x30mm</td>
+                                <td>0.5 kg</td>
+                                <td><span class="product-badge small">Mały</span></td>
+                                <td>6.50 zł</td>
+                                <td><span class="tax-badge">23%</span></td>
+                                <td>8.00 zł</td>
+                                <td>1000 szt.</td>
+                                <td>
+                                    <button class="btn btn-sm btn-primary"><i class="fas fa-edit"></i></button>
+                                    <button class="btn btn-sm btn-danger"><i class="fas fa-trash"></i></button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Rura stalowa 2m</td>
+                                <td>RUR-STA-2M</td>
+                                <td>Rura stalowa ocynkowana, długość 2m</td>
+                                <td>10 kg</td>
+                                <td><span class="product-badge large">Duży</span></td>
+                                <td>40.65 zł</td>
+                                <td><span class="tax-badge">23%</span></td>
+                                <td>50.00 zł</td>
+                                <td>50 szt.</td>
+                                <td>
+                                    <button class="btn btn-sm btn-primary"><i class="fas fa-edit"></i></button>
+                                    <button class="btn btn-sm btn-danger"><i class="fas fa-trash"></i></button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Siatka ogrodzeniowa 1.5x10m</td>
+                                <td>SIA-OGR-1.5X10</td>
+                                <td>Siatka ogrodzeniowa ocynkowana, wymiary 1.5x10m</td>
+                                <td>15 kg</td>
+                                <td><span class="product-badge large">Duży</span></td>
+                                <td>81.30 zł</td>
+                                <td><span class="tax-badge">23%</span></td>
+                                <td>100.00 zł</td>
+                                <td>20 szt.</td>
+                                <td>
+                                    <button class="btn btn-sm btn-primary"><i class="fas fa-edit"></i></button>
+                                    <button class="btn btn-sm btn-danger"><i class="fas fa-trash"></i></button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Wkrętarka akumulatorowa 24V</td>
+                                <td>WKR-AKU-24V</td>
+                                <td>Wkrętarka akumulatorowa z trzema bateriami</td>
+                                <td>1.5 kg</td>
+                                <td><span class="product-badge small">Mały</span></td>
+                                <td>325.20 zł</td>
+                                <td><span class="tax-badge">23%</span></td>
+                                <td>400.00 zł</td>
+                                <td>10 szt.</td>
+                                <td>
+                                    <button class="btn btn-sm btn-primary"><i class="fas fa-edit"></i></button>
+                                    <button class="btn btn-sm btn-danger"><i class="fas fa-trash"></i></button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Gwoździe budowlane 5cm</td>
+                                <td>GWO-BUD-5CM</td>
+                                <td>Gwoździe budowlane ocynkowane, długość 5cm</td>
+                                <td>1 kg</td>
+                                <td><span class="product-badge small">Mały</span></td>
+                                <td>8.13 zł</td>
+                                <td><span class="tax-badge">23%</span></td>
+                                <td>10.00 zł</td>
+                                <td>500 szt.</td>
+                                <td>
+                                    <button class="btn btn-sm btn-primary"><i class="fas fa-edit"></i></button>
+                                    <button class="btn btn-sm btn-danger"><i class="fas fa-trash"></i></button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Wkręty samowiercące 4x30mm</td>
+                                <td>WKR-SAM-4X30</td>
+                                <td>Wkręty samowiercące do metalu, rozmiar 4x30mm</td>
+                                <td>0.5 kg</td>
+                                <td><span class="product-badge small">Mały</span></td>
+                                <td>6.50 zł</td>
+                                <td><span class="tax-badge">23%</span></td>
+                                <td>8.00 zł</td>
+                                <td>1000 szt.</td>
+                                <td>
+                                    <button class="btn btn-sm btn-primary"><i class="fas fa-edit"></i></button>
+                                    <button class="btn btn-sm btn-danger"><i class="fas fa-trash"></i></button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Rura stalowa 2m</td>
+                                <td>RUR-STA-2M</td>
+                                <td>Rura stalowa ocynkowana, długość 2m</td>
+                                <td>10 kg</td>
+                                <td><span class="product-badge large">Duży</span></td>
+                                <td>40.65 zł</td>
+                                <td><span class="tax-badge">23%</span></td>
+                                <td>50.00 zł</td>
+                                <td>50 szt.</td>
+                                <td>
+                                    <button class="btn btn-sm btn-primary"><i class="fas fa-edit"></i></button>
+                                    <button class="btn btn-sm btn-danger"><i class="fas fa-trash"></i></button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Siatka ogrodzeniowa 1.5x10m</td>
+                                <td>SIA-OGR-1.5X10</td>
+                                <td>Siatka ogrodzeniowa ocynkowana, wymiary 1.5x10m</td>
+                                <td>15 kg</td>
+                                <td><span class="product-badge large">Duży</span></td>
+                                <td>81.30 zł</td>
+                                <td><span class="tax-badge">23%</span></td>
+                                <td>100.00 zł</td>
+                                <td>20 szt.</td>
+                                <td>
+                                    <button class="btn btn-sm btn-primary"><i class="fas fa-edit"></i></button>
+                                    <button class="btn btn-sm btn-danger"><i class="fas fa-trash"></i></button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Wkrętarka akumulatorowa 24V</td>
+                                <td>WKR-AKU-24V</td>
+                                <td>Wkrętarka akumulatorowa z trzema bateriami</td>
+                                <td>1.5 kg</td>
+                                <td><span class="product-badge small">Mały</span></td>
+                                <td>325.20 zł</td>
+                                <td><span class="tax-badge">23%</span></td>
+                                <td>400.00 zł</td>
+                                <td>10 szt.</td>
+                                <td>
+                                    <button class="btn btn-sm btn-primary"><i class="fas fa-edit"></i></button>
+                                    <button class="btn btn-sm btn-danger"><i class="fas fa-trash"></i></button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Wiertarka stołowa 750W</td>
+                                <td>WIE-STO-750</td>
+                                <td>Wiertarka stołowa z regulacją obrotów</td>
+                                <td>12 kg</td>
+                                <td><span class="product-badge large">Duży</span></td>
+                                <td>487.80 zł</td>
+                                <td><span class="tax-badge">23%</span></td>
+                                <td>600.00 zł</td>
+                                <td>8 szt.</td>
+                                <td>
+                                    <button class="btn btn-sm btn-primary"><i class="fas fa-edit"></i></button>
+                                    <button class="btn btn-sm btn-danger"><i class="fas fa-trash"></i></button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Wiertło do betonu 12mm</td>
+                                <td>WIE-BET-12</td>
+                                <td>Wiertło do betonu o średnicy 12mm</td>
+                                <td>0.3 kg</td>
+                                <td><span class="product-badge small">Mały</span></td>
+                                <td>8.13 zł</td>
+                                <td><span class="tax-badge">23%</span></td>
+                                <td>10.00 zł</td>
+                                <td>150 szt.</td>
+                                <td>
+                                    <button class="btn btn-sm btn-primary"><i class="fas fa-edit"></i></button>
+                                    <button class="btn btn-sm btn-danger"><i class="fas fa-trash"></i></button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Wiertarka sieciowa 800W</td>
+                                <td>WKR-SIE-800</td>
+                                <td>Wkrętarka sieciowa z regulacją obrotów</td>
+                                <td>2 kg</td>
+                                <td><span class="product-badge medium">Średni</span></td>
+                                <td>243.90 zł</td>
+                                <td><span class="tax-badge">23%</span></td>
+                                <td>300.00 zł</td>
+                                <td>20 szt.</td>
+                                <td>
+                                    <button class="btn btn-sm btn-primary"><i class="fas fa-edit"></i></button>
+                                    <button class="btn btn-sm btn-danger"><i class="fas fa-trash"></i></button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Wiertarka udarowa 1000W</td>
+                                <td>WIE-UD-1000</td>
+                                <td>Wiertarka udarowa z regulacją obrotów</td>
+                                <td>3 kg</td>
+                                <td><span class="product-badge medium">Średni</span></td>
+                                <td>243.90 zł</td>
+                                <td><span class="tax-badge">23%</span></td>
+                                <td>300.00 zł</td>
+                                <td>15 szt.</td>
+                                <td>
+                                    <button class="btn btn-sm btn-primary"><i class="fas fa-edit"></i></button>
+                                    <button class="btn btn-sm btn-danger"><i class="fas fa-trash"></i></button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Wiertło do drewna 8mm</td>
+                                <td>WIE-DRE-8</td>
+                                <td>Wiertło do drewna o średnicy 8mm</td>
+                                <td>0.1 kg</td>
+                                <td><span class="product-badge small">Mały</span></td>
+                                <td>4.07 zł</td>
+                                <td><span class="tax-badge">23%</span></td>
+                                <td>5.00 zł</td>
+                                <td>300 szt.</td>
+                                <td>
+                                    <button class="btn btn-sm btn-primary"><i class="fas fa-edit"></i></button>
+                                    <button class="btn btn-sm btn-danger"><i class="fas fa-trash"></i></button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Wkrętarka akumulatorowa 12V</td>
+                                <td>WKR-AKU-12V</td>
+                                <td>Wkrętarka akumulatorowa z jedną baterią</td>
+                                <td>1 kg</td>
+                                <td><span class="product-badge small">Mały</span></td>
+                                <td>162.60 zł</td>
+                                <td><span class="tax-badge">23%</span></td>
+                                <td>200.00 zł</td>
+                                <td>20 szt.</td>
+                                <td>
+                                    <button class="btn btn-sm btn-primary"><i class="fas fa-edit"></i></button>
+                                    <button class="btn btn-sm btn-danger"><i class="fas fa-trash"></i></button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Wiertarka stołowa 500W</td>
+                                <td>WIE-STO-500</td>
+                                <td>Wiertarka stołowa z regulacją obrotów</td>
+                                <td>10 kg</td>
+                                <td><span class="product-badge large">Duży</span></td>
+                                <td>406.50 zł</td>
+                                <td><span class="tax-badge">23%</span></td>
+                                <td>500.00 zł</td>
+                                <td>10 szt.</td>
+                                <td>
+                                    <button class="btn btn-sm btn-primary"><i class="fas fa-edit"></i></button>
+                                    <button class="btn btn-sm btn-danger"><i class="fas fa-trash"></i></button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Wiertło do metalu 6mm</td>
+                                <td>WIE-MET-6</td>
+                                <td>Wiertło do metalu o średnicy 6mm</td>
+                                <td>0.1 kg</td>
+                                <td><span class="product-badge small">Mały</span></td>
+                                <td>4.07 zł</td>
+                                <td><span class="tax-badge">23%</span></td>
+                                <td>5.00 zł</td>
+                                <td>300 szt.</td>
+                                <td>
+                                    <button class="btn btn-sm btn-primary"><i class="fas fa-edit"></i></button>
+                                    <button class="btn btn-sm btn-danger"><i class="fas fa-trash"></i></button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Wkrętarka sieciowa 600W</td>
+                                <td>WKR-SIE-600</td>
+                                <td>Wkrętarka sieciowa z regulacją obrotów</td>
+                                <td>1.8 kg</td>
+                                <td><span class="product-badge medium">Średni</span></td>
+                                <td>162.60 zł</td>
+                                <td><span class="tax-badge">23%</span></td>
+                                <td>200.00 zł</td>
+                                <td>25 szt.</td>
+                                <td>
+                                    <button class="btn btn-sm btn-primary"><i class="fas fa-edit"></i></button>
+                                    <button class="btn btn-sm btn-danger"><i class="fas fa-trash"></i></button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Szpachla 150mm</td>
+                                <td>SZP-150</td>
+                                <td>Szpachla do gładzi, szerokość 150mm</td>
+                                <td>0.3 kg</td>
+                                <td><span class="product-badge small">Mały</span></td>
+                                <td>8.13 zł</td>
+                                <td><span class="tax-badge">23%</span></td>
+                                <td>10.00 zł</td>
+                                <td>100 szt.</td>
+                                <td>
+                                    <button class="btn btn-sm btn-primary"><i class="fas fa-edit"></i></button>
+                                    <button class="btn btn-sm btn-danger"><i class="fas fa-trash"></i></button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Piła łańcuchowa 2000W</td>
+                                <td>PIŁ-ŁAŃ-2000</td>
+                                <td>Piła łańcuchowa elektryczna</td>
+                                <td>5 kg</td>
+                                <td><span class="product-badge large">Duży</span></td>
+                                <td>406.50 zł</td>
+                                <td><span class="tax-badge">23%</span></td>
+                                <td>500.00 zł</td>
+                                <td>15 szt.</td>
+                                <td>
+                                    <button class="btn btn-sm btn-primary"><i class="fas fa-edit"></i></button>
+                                    <button class="btn btn-sm btn-danger"><i class="fas fa-trash"></i></button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Wiertarka udarowa 800W</td>
+                                <td>WIE-UD-800</td>
+                                <td>Wiertarka udarowa z regulacją obrotów</td>
+                                <td>2.5 kg</td>
+                                <td><span class="product-badge medium">Średni</span></td>
+                                <td>162.60 zł</td>
+                                <td><span class="tax-badge">23%</span></td>
+                                <td>200.00 zł</td>
+                                <td>30 szt.</td>
+                                <td>
+                                    <button class="btn btn-sm btn-primary"><i class="fas fa-edit"></i></button>
+                                    <button class="btn btn-sm btn-danger"><i class="fas fa-trash"></i></button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Łopata do śniegu</td>
+                                <td>ŁOP-SNIEG</td>
+                                <td>Łopata do odśnieżania</td>
+                                <td>1.5 kg</td>
+                                <td><span class="product-badge small">Mały</span></td>
+                                <td>24.39 zł</td>
+                                <td><span class="tax-badge">23%</span></td>
+                                <td>30.00 zł</td>
+                                <td>80 szt.</td>
+                                <td>
+                                    <button class="btn btn-sm btn-primary"><i class="fas fa-edit"></i></button>
+                                    <button class="btn btn-sm btn-danger"><i class="fas fa-trash"></i></button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Wąż ogrodowy 20m</td>
+                                <td>WĄŻ-OGR-20</td>
+                                <td>Wąż ogrodowy, długość 20m</td>
+                                <td>2 kg</td>
+                                <td><span class="product-badge medium">Średni</span></td>
+                                <td>32.52 zł</td>
+                                <td><span class="tax-badge">23%</span></td>
+                                <td>40.00 zł</td>
+                                <td>60 szt.</td>
+                                <td>
+                                    <button class="btn btn-sm btn-primary"><i class="fas fa-edit"></i></button>
+                                    <button class="btn btn-sm btn-danger"><i class="fas fa-trash"></i></button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Taśma malarska 50m</td>
+                                <td>TAS-MAL-50</td>
+                                <td>Taśma malarska do zabezpieczeń, długość 50m</td>
+                                <td>0.2 kg</td>
+                                <td><span class="product-badge small">Mały</span></td>
+                                <td>8.13 zł</td>
+                                <td><span class="tax-badge">23%</span></td>
+                                <td>10.00 zł</td>
+                                <td>300 szt.</td>
+                                <td>
+                                    <button class="btn btn-sm btn-primary"><i class="fas fa-edit"></i></button>
+                                    <button class="btn btn-sm btn-danger"><i class="fas fa-trash"></i></button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Folia budowlana 4x25m</td>
+                                <td>FOL-BUD-4X25</td>
+                                <td>Folia budowlana do zabezpieczeń, wymiary 4x25m</td>
+                                <td>5 kg</td>
+                                <td><span class="product-badge medium">Średni</span></td>
+                                <td>24.39 zł</td>
+                                <td><span class="tax-badge">23%</span></td>
+                                <td>30.00 zł</td>
+                                <td>50 szt.</td>
+                                <td>
+                                    <button class="btn btn-sm btn-primary"><i class="fas fa-edit"></i></button>
+                                    <button class="btn btn-sm btn-danger"><i class="fas fa-trash"></i></button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Wkręty do drewna 4x50mm</td>
+                                <td>WKR-DRE-4X50</td>
+                                <td>Wkręty do drewna, rozmiar 4x50mm</td>
+                                <td>0.1 kg</td>
+                                <td><span class="product-badge small">Mały</span></td>
+                                <td>4.07 zł</td>
+                                <td><span class="tax-badge">23%</span></td>
+                                <td>5.00 zł</td>
+                                <td>1000 szt.</td>
+                                <td>
+                                    <button class="btn btn-sm btn-primary"><i class="fas fa-edit"></i></button>
+                                    <button class="btn btn-sm btn-danger"><i class="fas fa-trash"></i></button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Rura PVC 110mm</td>
+                                <td>RUR-PVC-110</td>
+                                <td>Rura PVC do kanalizacji, średnica 110mm</td>
+                                <td>2 kg</td>
+                                <td><span class="product-badge medium">Średni</span></td>
+                                <td>16.26 zł</td>
+                                <td><span class="tax-badge">23%</span></td>
+                                <td>20.00 zł</td>
+                                <td>100 szt.</td>
+                                <td>
+                                    <button class="btn btn-sm btn-primary"><i class="fas fa-edit"></i></button>
+                                    <button class="btn btn-sm btn-danger"><i class="fas fa-trash"></i></button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Siatka zbrojeniowa 2x3m</td>
+                                <td>SIA-ZBR-2X3</td>
+                                <td>Siatka zbrojeniowa do betonu, wymiary 2x3m</td>
+                                <td>15 kg</td>
+                                <td><span class="product-badge large">Duży</span></td>
+                                <td>40.65 zł</td>
+                                <td><span class="tax-badge">23%</span></td>
+                                <td>50.00 zł</td>
+                                <td>30 szt.</td>
+                                <td>
+                                    <button class="btn btn-sm btn-primary"><i class="fas fa-edit"></i></button>
+                                    <button class="btn btn-sm btn-danger"><i class="fas fa-trash"></i></button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Piasek budowlany 25kg</td>
+                                <td>PIA-BUD-25</td>
+                                <td>Piasek budowlany do zapraw i betonu</td>
+                                <td>25 kg</td>
+                                <td><span class="product-badge medium">Średni</span></td>
+                                <td>4.88 zł</td>
+                                <td><span class="tax-badge">23%</span></td>
+                                <td>6.00 zł</td>
+                                <td>500 szt.</td>
+                                <td>
+                                    <button class="btn btn-sm btn-primary"><i class="fas fa-edit"></i></button>
+                                    <button class="btn btn-sm btn-danger"><i class="fas fa-trash"></i></button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Wiertło do betonu 10mm</td>
+                                <td>WIE-BET-10</td>
+                                <td>Wiertło do betonu o średnicy 10mm</td>
+                                <td>0.2 kg</td>
+                                <td><span class="product-badge small">Mały</span></td>
+                                <td>8.13 zł</td>
+                                <td><span class="tax-badge">23%</span></td>
+                                <td>10.00 zł</td>
+                                <td>200 szt.</td>
+                                <td>
+                                    <button class="btn btn-sm btn-primary"><i class="fas fa-edit"></i></button>
+                                    <button class="btn btn-sm btn-danger"><i class="fas fa-trash"></i></button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Betoniarka 150L</td>
+                                <td>BET-150L</td>
+                                <td>Betoniarka o pojemności 150 litrów</td>
+                                <td>50 kg</td>
+                                <td><span class="product-badge large">Duży</span></td>
+                                <td>813.00 zł</td>
+                                <td><span class="tax-badge">23%</span></td>
+                                <td>1000.00 zł</td>
+                                <td>5 szt.</td>
+                                <td>
+                                    <button class="btn btn-sm btn-primary"><i class="fas fa-edit"></i></button>
+                                    <button class="btn btn-sm btn-danger"><i class="fas fa-trash"></i></button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Wkrętarka akumulatorowa 18V</td>
+                                <td>WKR-AKU-18V</td>
+                                <td>Wkrętarka akumulatorowa z dwoma bateriami</td>
+                                <td>1.2 kg</td>
+                                <td><span class="product-badge small">Mały</span></td>
+                                <td>243.90 zł</td>
+                                <td><span class="tax-badge">23%</span></td>
+                                <td>300.00 zł</td>
+                                <td>20 szt.</td>
+                                <td>
+                                    <button class="btn btn-sm btn-primary"><i class="fas fa-edit"></i></button>
+                                    <button class="btn btn-sm btn-danger"><i class="fas fa-trash"></i></button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Drabina aluminiowa 3x9</td>
+                                <td>DRA-AL-3X9</td>
+                                <td>Drabina aluminiowa trójsegmentowa</td>
+                                <td>13.5 kg</td>
+                                <td><span class="product-badge large">Duży</span></td>
+                                <td>397.56 zł</td>
+                                <td><span class="tax-badge">23%</span></td>
+                                <td>489.00 zł</td>
+                                <td>10 szt.</td>
+                                <td>
+                                    <button class="btn btn-sm btn-primary"><i class="fas fa-edit"></i></button>
+                                    <button class="btn btn-sm btn-danger"><i class="fas fa-trash"></i></button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Tarcza do cięcia metalu 125mm</td>
+                                <td>TAR-MET-125</td>
+                                <td>Tarcza do cięcia metalu do szlifierki kątowej</td>
+                                <td>0.1 kg</td>
+                                <td><span class="product-badge small">Mały</span></td>
+                                <td>4.07 zł</td>
+                                <td><span class="tax-badge">23%</span></td>
+                                <td>5.00 zł</td>
+                                <td>168 szt.</td>
+                                <td>
+                                    <button class="btn btn-sm btn-primary"><i class="fas fa-edit"></i></button>
+                                    <button class="btn btn-sm btn-danger"><i class="fas fa-trash"></i></button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Szlifierka kątowa 900W</td>
+                                <td>SZL-KĄT-900</td>
+                                <td>Szlifierka kątowa 125mm z regulacją obrotów</td>
+                                <td>2.3 kg</td>
+                                <td><span class="product-badge small">Mały</span></td>
+                                <td>162.60 zł</td>
+                                <td><span class="tax-badge">23%</span></td>
+                                <td>200.00 zł</td>
+                                <td>15 szt.</td>
+                                <td>
+                                    <button class="btn btn-sm btn-primary"><i class="fas fa-edit"></i></button>
+                                    <button class="btn btn-sm btn-danger"><i class="fas fa-trash"></i></button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Piła tarczowa 1800W</td>
+                                <td>PŁA-TAR-1800</td>
+                                <td>Piła tarczowa ręczna z regulacją głębokości</td>
+                                <td>4.8 kg</td>
+                                <td><span class="product-badge medium">Średni</span></td>
+                                <td>365.85 zł</td>
+                                <td><span class="tax-badge">23%</span></td>
+                                <td>450.00 zł</td>
+                                <td>7 szt.</td>
+                                <td>
+                                    <button class="btn btn-sm btn-primary"><i class="fas fa-edit"></i></button>
+                                    <button class="btn btn-sm btn-danger"><i class="fas fa-trash"></i></button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Cegła klinkierowa czerwona</td>
+                                <td>CEG-KL-CZ</td>
+                                <td>Cegła klinkierowa pełna, kolor czerwony</td>
+                                <td>3.2 kg</td>
+                                <td><span class="product-badge small">Mały</span></td>
+                                <td>2.44 zł</td>
+                                <td><span class="tax-badge">23%</span></td>
+                                <td>3.00 zł</td>
+                                <td>1250 szt.</td>
+                                <td>
+                                    <button class="btn btn-sm btn-primary"><i class="fas fa-edit"></i></button>
+                                    <button class="btn btn-sm btn-danger"><i class="fas fa-trash"></i></button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Zaprawa tynkarska 25kg</td>
+                                <td>ZAP-TYN-25</td>
+                                <td>Zaprawa do tynkowania wewnętrznego i zewnętrznego</td>
+                                <td>25 kg</td>
+                                <td><span class="product-badge medium">Średni</span></td>
+                                <td>16.26 zł</td>
+                                <td><span class="tax-badge">23%</span></td>
+                                <td>20.00 zł</td>
+                                <td>92 szt.</td>
+                                <td>
+                                    <button class="btn btn-sm btn-primary"><i class="fas fa-edit"></i></button>
+                                    <button class="btn btn-sm btn-danger"><i class="fas fa-trash"></i></button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Lakier bezbarwny półmatowy 5L</td>
+                                <td>LAK-BEZ-PM5</td>
+                                <td>Lakier bezbarwny półmatowy do drewna</td>
+                                <td>5.3 kg</td>
+                                <td><span class="product-badge medium">Średni</span> <span class="product-badge dangerous">!</span></td>
+                                <td>97.56 zł</td>
+                                <td><span class="tax-badge">23%</span></td>
+                                <td>120.00 zł</td>
+                                <td>18 szt.</td>
+                                <td>
+                                    <button class="btn btn-sm btn-primary"><i class="fas fa-edit"></i></button>
+                                    <button class="btn btn-sm btn-danger"><i class="fas fa-trash"></i></button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Wełna mineralna 15cm</td>
+                                <td>WEL-MIN-15</td>
+                                <td>Wełna mineralna do izolacji termicznej i akustycznej</td>
+                                <td>12 kg</td>
+                                <td><span class="product-badge large">Duży</span></td>
+                                <td>20.33 zł</td>
+                                <td><span class="tax-badge">23%</span></td>
+                                <td>25.00 zł</td>
+                                <td>85 szt.</td>
+                                <td>
+                                    <button class="btn btn-sm btn-primary"><i class="fas fa-edit"></i></button>
+                                    <button class="btn btn-sm btn-danger"><i class="fas fa-trash"></i></button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Klej do płytek elastyczny 25kg</td>
+                                <td>KL-PŁY-EL25</td>
+                                <td>Klej elastyczny do płytek ceramicznych</td>
+                                <td>25 kg</td>
+                                <td><span class="product-badge medium">Średni</span></td>
+                                <td>40.65 zł</td>
+                                <td><span class="tax-badge">23%</span></td>
+                                <td>50.00 zł</td>
+                                <td>42 szt.</td>
+                                <td>
+                                    <button class="btn btn-sm btn-primary"><i class="fas fa-edit"></i></button>
+                                    <button class="btn btn-sm btn-danger"><i class="fas fa-trash"></i></button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Silikon sanitarny biały 310ml</td>
+                                <td>SIL-SAN-B310</td>
+                                <td>Silikon sanitarny przeciwgrzybiczny</td>
+                                <td>0.35 kg</td>
+                                <td><span class="product-badge small">Mały</span></td>
+                                <td>16.26 zł</td>
+                                <td><span class="tax-badge">23%</span></td>
+                                <td>20.00 zł</td>
+                                <td>64 szt.</td>
+                                <td>
+                                    <button class="btn btn-sm btn-primary"><i class="fas fa-edit"></i></button>
+                                    <button class="btn btn-sm btn-danger"><i class="fas fa-trash"></i></button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Piana montażowa 750ml</td>
+                                <td>PIA-MON-750</td>
+                                <td>Piana montażowa pistoletowa</td>
+                                <td>0.85 kg</td>
+                                <td><span class="product-badge small">Mały</span> <span class="product-badge dangerous">!</span></td>
+                                <td>19.51 zł</td>
+                                <td><span class="tax-badge">23%</span></td>
+                                <td>24.00 zł</td>
+                                <td>96 szt.</td>
+                                <td>
+                                    <button class="btn btn-sm btn-primary"><i class="fas fa-edit"></i></button>
+                                    <button class="btn btn-sm btn-danger"><i class="fas fa-trash"></i></button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Gips szpachlowy 20kg</td>
+                                <td>GIP-SZP-20</td>
+                                <td>Gips szpachlowy do wyrównywania powierzchni</td>
+                                <td>20 kg</td>
+                                <td><span class="product-badge medium">Średni</span></td>
+                                <td>24.39 zł</td>
+                                <td><span class="tax-badge">23%</span></td>
+                                <td>30.00 zł</td>
+                                <td>58 szt.</td>
+                                <td>
+                                    <button class="btn btn-sm btn-primary"><i class="fas fa-edit"></i></button>
+                                    <button class="btn btn-sm btn-danger"><i class="fas fa-trash"></i></button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Papa termozgrzewalna PV250</td>
+                                <td>PAP-TZ-PV250</td>
+                                <td>Papa nawierzchniowa, grubość 5.2mm</td>
+                                <td>37 kg</td>
+                                <td><span class="product-badge large">Duży</span></td>
+                                <td>146.34 zł</td>
+                                <td><span class="tax-badge">23%</span></td>
+                                <td>180.00 zł</td>
+                                <td>24 szt.</td>
+                                <td>
+                                    <button class="btn btn-sm btn-primary"><i class="fas fa-edit"></i></button>
+                                    <button class="btn btn-sm btn-danger"><i class="fas fa-trash"></i></button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Płyta OSB-3 22mm</td>
+                                <td>OSB-3-22</td>
+                                <td>Płyta OSB wodoodporna, grubość 22mm</td>
+                                <td>32 kg</td>
+                                <td><span class="product-badge large">Duży</span></td>
+                                <td>89.43 zł</td>
+                                <td><span class="tax-badge">23%</span></td>
+                                <td>110.00 zł</td>
+                                <td>50 szt.</td>
+                                <td>
+                                    <button class="btn btn-sm btn-primary"><i class="fas fa-edit"></i></button>
+                                    <button class="btn btn-sm btn-danger"><i class="fas fa-trash"></i></button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Taśma malarska 50m</td>
+                                <td>TAS-MAL-50</td>
+                                <td>Taśma malarska do zabezpieczeń, długość 50m</td>
+                                <td>0.2 kg</td>
+                                <td><span class="product-badge small">Mały</span></td>
+                                <td>8.13 zł</td>
+                                <td><span class="tax-badge">23%</span></td>
+                                <td>10.00 zł</td>
+                                <td>300 szt.</td>
+                                <td>
+                                    <button class="btn btn-sm btn-primary"><i class="fas fa-edit"></i></button>
+                                    <button class="btn btn-sm btn-danger"><i class="fas fa-trash"></i></button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Wąż ogrodowy 20m</td>
+                                <td>WĄŻ-OGR-20</td>
+                                <td>Wąż ogrodowy, długość 20m</td>
+                                <td>2 kg</td>
+                                <td><span class="product-badge medium">Średni</span></td>
+                                <td>32.52 zł</td>
+                                <td><span class="tax-badge">23%</span></td>
+                                <td>40.00 zł</td>
+                                <td>60 szt.</td>
+                                <td>
+                                    <button class="btn btn-sm btn-primary"><i class="fas fa-edit"></i></button>
+                                    <button class="btn btn-sm btn-danger"><i class="fas fa-trash"></i></button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Łopata do śniegu</td>
+                                <td>ŁOP-SNIEG</td>
+                                <td>Łopata do odśnieżania</td>
+                                <td>1.5 kg</td>
+                                <td><span class="product-badge small">Mały</span></td>
+                                <td>24.39 zł</td>
+                                <td><span class="tax-badge">23%</span></td>
+                                <td>30.00 zł</td>
+                                <td>80 szt.</td>
+                                <td>
+                                    <button class="btn btn-sm btn-primary"><i class="fas fa-edit"></i></button>
+                                    <button class="btn btn-sm btn-danger"><i class="fas fa-trash"></i></button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Wiertarka udarowa 800W</td>
+                                <td>WIE-UD-800</td>
+                                <td>Wiertarka udarowa z regulacją obrotów</td>
+                                <td>2.5 kg</td>
+                                <td><span class="product-badge medium">Średni</span></td>
+                                <td>162.60 zł</td>
+                                <td><span class="tax-badge">23%</span></td>
+                                <td>200.00 zł</td>
+                                <td>30 szt.</td>
+                                <td>
+                                    <button class="btn btn-sm btn-primary"><i class="fas fa-edit"></i></button>
+                                    <button class="btn btn-sm btn-danger"><i class="fas fa-trash"></i></button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Piła łańcuchowa 2000W</td>
+                                <td>PIŁ-ŁAŃ-2000</td>
+                                <td>Piła łańcuchowa elektryczna</td>
+                                <td>5 kg</td>
+                                <td><span class="product-badge large">Duży</span></td>
+                                <td>406.50 zł</td>
+                                <td><span class="tax-badge">23%</span></td>
+                                <td>500.00 zł</td>
+                                <td>15 szt.</td>
+                                <td>
+                                    <button class="btn btn-sm btn-primary"><i class="fas fa-edit"></i></button>
+                                    <button class="btn btn-sm btn-danger"><i class="fas fa-trash"></i></button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Szpachla 150mm</td>
+                                <td>SZP-150</td>
+                                <td>Szpachla do gładzi, szerokość 150mm</td>
+                                <td>0.3 kg</td>
+                                <td><span class="product-badge small">Mały</span></td>
+                                <td>8.13 zł</td>
+                                <td><span class="tax-badge">23%</span></td>
+                                <td>10.00 zł</td>
+                                <td>100 szt.</td>
+                                <td>
+                                    <button class="btn btn-sm btn-primary"><i class="fas fa-edit"></i></button>
+                                    <button class="btn btn-sm btn-danger"><i class="fas fa-trash"></i></button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Wkrętarka sieciowa 600W</td>
+                                <td>WKR-SIE-600</td>
+                                <td>Wkrętarka sieciowa z regulacją obrotów</td>
+                                <td>1.8 kg</td>
+                                <td><span class="product-badge medium">Średni</span></td>
+                                <td>162.60 zł</td>
+                                <td><span class="tax-badge">23%</span></td>
+                                <td>200.00 zł</td>
+                                <td>25 szt.</td>
+                                <td>
+                                    <button class="btn btn-sm btn-primary"><i class="fas fa-edit"></i></button>
+                                    <button class="btn btn-sm btn-danger"><i class="fas fa-trash"></i></button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Wiertło do metalu 6mm</td>
+                                <td>WIE-MET-6</td>
+                                <td>Wiertło do metalu o średnicy 6mm</td>
+                                <td>0.1 kg</td>
+                                <td><span class="product-badge small">Mały</span></td>
+                                <td>4.07 zł</td>
+                                <td><span class="tax-badge">23%</span></td>
+                                <td>5.00 zł</td>
+                                <td>300 szt.</td>
+                                <td>
+                                    <button class="btn btn-sm btn-primary"><i class="fas fa-edit"></i></button>
+                                    <button class="btn btn-sm btn-danger"><i class="fas fa-trash"></i></button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Wiertarka stołowa 500W</td>
+                                <td>WIE-STO-500</td>
+                                <td>Wiertarka stołowa z regulacją obrotów</td>
+                                <td>10 kg</td>
+                                <td><span class="product-badge large">Duży</span></td>
+                                <td>406.50 zł</td>
+                                <td><span class="tax-badge">23%</span></td>
+                                <td>500.00 zł</td>
+                                <td>10 szt.</td>
+                                <td>
+                                    <button class="btn btn-sm btn-primary"><i class="fas fa-edit"></i></button>
+                                    <button class="btn btn-sm btn-danger"><i class="fas fa-trash"></i></button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Wkrętarka akumulatorowa 12V</td>
+                                <td>WKR-AKU-12V</td>
+                                <td>Wkrętarka akumulatorowa z jedną baterią</td>
+                                <td>1 kg</td>
+                                <td><span class="product-badge small">Mały</span></td>
+                                <td>162.60 zł</td>
+                                <td><span class="tax-badge">23%</span></td>
+                                <td>200.00 zł</td>
+                                <td>20 szt.</td>
+                                <td>
+                                    <button class="btn btn-sm btn-primary"><i class="fas fa-edit"></i></button>
+                                    <button class="btn btn-sm btn-danger"><i class="fas fa-trash"></i></button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Wiertło do drewna 8mm</td>
+                                <td>WIE-DRE-8</td>
+                                <td>Wiertło do drewna o średnicy 8mm</td>
+                                <td>0.1 kg</td>
+                                <td><span class="product-badge small">Mały</span></td>
+                                <td>4.07 zł</td>
+                                <td><span class="tax-badge">23%</span></td>
+                                <td>5.00 zł</td>
+                                <td>300 szt.</td>
+                                <td>
+                                    <button class="btn btn-sm btn-primary"><i class="fas fa-edit"></i></button>
+                                    <button class="btn btn-sm btn-danger"><i class="fas fa-trash"></i></button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Wiertarka udarowa 1000W</td>
+                                <td>WIE-UD-1000</td>
+                                <td>Wiertarka udarowa z regulacją obrotów</td>
+                                <td>3 kg</td>
+                                <td><span class="product-badge medium">Średni</span></td>
+                                <td>243.90 zł</td>
+                                <td><span class="tax-badge">23%</span></td>
+                                <td>300.00 zł</td>
+                                <td>15 szt.</td>
+                                <td>
+                                    <button class="btn btn-sm btn-primary"><i class="fas fa-edit"></i></button>
+                                    <button class="btn btn-sm btn-danger"><i class="fas fa-trash"></i></button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Wkrętarka sieciowa 800W</td>
+                                <td>WKR-SIE-800</td>
+                                <td>Wkrętarka sieciowa z regulacją obrotów</td>
+                                <td>2 kg</td>
+                                <td><span class="product-badge medium">Średni</span></td>
+                                <td>243.90 zł</td>
+                                <td><span class="tax-badge">23%</span></td>
+                                <td>300.00 zł</td>
+                                <td>20 szt.</td>
+                                <td>
+                                    <button class="btn btn-sm btn-primary"><i class="fas fa-edit"></i></button>
+                                    <button class="btn btn-sm btn-danger"><i class="fas fa-trash"></i></button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Wiertło do betonu 12mm</td>
+                                <td>WIE-BET-12</td>
+                                <td>Wiertło do betonu o średnicy 12mm</td>
+                                <td>0.3 kg</td>
+                                <td><span class="product-badge small">Mały</span></td>
+                                <td>8.13 zł</td>
+                                <td><span class="tax-badge">23%</span></td>
+                                <td>10.00 zł</td>
+                                <td>150 szt.</td>
+                                <td>
+                                    <button class="btn btn-sm btn-primary"><i class="fas fa-edit"></i></button>
+                                    <button class="btn btn-sm btn-danger"><i class="fas fa-trash"></i></button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Wiertarka stołowa 750W</td>
+                                <td>WIE-STO-750</td>
+                                <td>Wiertarka stołowa z regulacją obrotów</td>
+                                <td>12 kg</td>
+                                <td><span class="product-badge large">Duży</span></td>
+                                <td>487.80 zł</td>
+                                <td><span class="tax-badge">23%</span></td>
+                                <td>600.00 zł</td>
+                                <td>8 szt.</td>
+                                <td>
+                                    <button class="btn btn-sm btn-primary"><i class="fas fa-edit"></i></button>
+                                    <button class="btn btn-sm btn-danger"><i class="fas fa-trash"></i></button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Wkrętarka akumulatorowa 24V</td>
+                                <td>WKR-AKU-24V</td>
+                                <td>Wkrętarka akumulatorowa z trzema bateriami</td>
+                                <td>1.5 kg</td>
+                                <td><span class="product-badge small">Mały</span></td>
+                                <td>325.20 zł</td>
+                                <td><span class="tax-badge">23%</span></td>
+                                <td>400.00 zł</td>
+                                <td>10 szt.</td>
+                                <td>
+                                    <button class="btn btn-sm btn-primary"><i class="fas fa-edit"></i></button>
+                                    <button class="btn btn-sm btn-danger"><i class="fas fa-trash"></i></button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- dodawanie produktuw -->
+    <div class="modal fade" id="addProductModal" tabindex="-1" aria-labelledby="addProductModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="addProductModalLabel">Dodaj nowy produkt</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="addProductForm">
+                        <div class="mb-3">
+                            <label for="productName" class="form-label">Nazwa produktu</label>
+                            <input type="text" class="form-control" id="productName" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="productSerial" class="form-label">Numer seryjny</label>
+                            <input type="text" class="form-control" id="productSerial" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="productDescription" class="form-label">Opis</label>
+                            <textarea class="form-control" id="productDescription" rows="3" required></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label for="productWeight" class="form-label">Waga</label>
+                            <input type="text" class="form-control" id="productWeight" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="productSize" class="form-label">Rozmiar</label>
+                            <select class="form-select" id="productSize" required>
+                                <option value="Mały">Mały</option>
+                                <option value="Średni">Średni</option>
+                                <option value="Duży">Duży</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="productNetPrice" class="form-label">Cena netto</label>
+                            <input type="text" class="form-control" id="productNetPrice" required oninput="calculateGrossPrice()">
+                        </div>
+                        <div class="mb-3">
+                            <label for="productVat" class="form-label">VAT</label>
+                            <select class="form-select" id="productVat" required onchange="calculateGrossPrice()">
+                                <option value="0">0%</option>
+                                <option value="5">5%</option>
+                                <option value="8">8%</option>
+                                <option value="23">23%</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="productGrossPrice" class="form-label">Cena brutto</label>
+                            <input type="text" class="form-control" id="productGrossPrice" required readonly>
+                        </div>
+                        <div class="mb-3">
+                            <label for="productQuantity" class="form-label">Ilość</label>
+                            <input type="text" class="form-control" id="productQuantity" required>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Dodaj produkt</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let editRow = null;
+    
+        function showAddProductPopup() {
+            editRow = null;
+            document.getElementById('addProductForm').reset();
+            var addProductModal = new bootstrap.Modal(document.getElementById('addProductModal'));
+            addProductModal.show();
+        }
+    
+        function calculateGrossPrice() {
+            var netPrice = parseFloat(document.getElementById('productNetPrice').value);
+            var vatRate = parseFloat(document.getElementById('productVat').value);
+            if (!isNaN(netPrice) && !isNaN(vatRate)) {
+                var grossPrice = netPrice * (1 + vatRate / 100);
+                document.getElementById('productGrossPrice').value = grossPrice.toFixed(2);
+            }
+        }
+    
+        function editProduct(button) {
+            editRow = button.parentElement.parentElement;
+            document.getElementById('productName').value = editRow.cells[0].innerText;
+            document.getElementById('productSerial').value = editRow.cells[1].innerText;
+            document.getElementById('productDescription').value = editRow.cells[2].innerText;
+            document.getElementById('productWeight').value = editRow.cells[3].innerText;
+            document.getElementById('productSize').value = editRow.cells[4].innerText.trim();
+            document.getElementById('productNetPrice').value = parseFloat(editRow.cells[5].innerText);
+            document.getElementById('productVat').value = parseFloat(editRow.cells[6].innerText);
+            document.getElementById('productGrossPrice').value = parseFloat(editRow.cells[7].innerText);
+            document.getElementById('productQuantity').value = parseInt(editRow.cells[8].innerText);
+    
+            var addProductModal = new bootstrap.Modal(document.getElementById('addProductModal'));
+            addProductModal.show();
+        }
+    
+        function deleteProduct(button) {
+            var row = button.parentElement.parentElement;
+            row.remove();
+        }
+    
+        document.getElementById('addProductForm').addEventListener('submit', function (event) {
+            event.preventDefault();
+            var productName = document.getElementById('productName').value;
+            var productSerial = document.getElementById('productSerial').value;
+            var productDescription = document.getElementById('productDescription').value;
+            var productWeight = document.getElementById('productWeight').value;
+            var productSize = document.getElementById('productSize').value;
+            var productNetPrice = document.getElementById('productNetPrice').value;
+            var productVat = document.getElementById('productVat').value;
+            var productGrossPrice = document.getElementById('productGrossPrice').value;
+            var productQuantity = document.getElementById('productQuantity').value;
+    
+            if (editRow) {
+                editRow.cells[0].innerText = productName;
+                editRow.cells[1].innerText = productSerial;
+                editRow.cells[2].innerText = productDescription;
+                editRow.cells[3].innerText = productWeight;
+                editRow.cells[4].innerHTML = `<span class="product-badge ${productSize.toLowerCase()}">${productSize}</span>`;
+                editRow.cells[5].innerText = `${productNetPrice} zł`;
+                editRow.cells[6].innerHTML = `<span class="tax-badge">${productVat}%</span>`;
+                editRow.cells[7].innerText = `${productGrossPrice} zł`;
+                editRow.cells[8].innerText = `${productQuantity} szt.`;
+            } else {
+                var newRow = document.createElement('tr');
+                newRow.innerHTML = `
+                    <td>${productName}</td>
+                    <td>${productSerial}</td>
+                    <td>${productDescription}</td>
+                    <td>${productWeight}</td>
+                    <td><span class="product-badge ${productSize.toLowerCase()}">${productSize}</span></td>
+                    <td>${productNetPrice} zł</td>
+                    <td><span class="tax-badge">${productVat}%</span></td>
+                    <td>${productGrossPrice} zł</td>
+                    <td>${productQuantity} szt.</td>
+                    <td>
+                        <button class="btn btn-sm btn-primary" onclick="editProduct(this)"><i class="fas fa-edit"></i></button>
+                        <button class="btn btn-sm btn-danger" onclick="deleteProduct(this)"><i class="fas fa-trash"></i></button>
+                    </td>
+                `;
+                document.getElementById('product-list').appendChild(newRow);
+            }
+    
+            var addProductModal = bootstrap.Modal.getInstance(document.getElementById('addProductModal'));
+            addProductModal.hide();
+        });
+    </script>
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.2.0/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

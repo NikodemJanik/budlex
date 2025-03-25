@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel Administracyjny - Sklep Budowlany - Zamówienia</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.2.0/css/bootstrap.min.css">
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --secondary-color: #f39c12;
+            --light-gray: #ecf0f1;
+            --dark-gray: #7f8c8d;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            display: flex;
+            min-height: 100vh;
+            background-color: #f8f9fa;
+        }
+
+        #sidebar {
+            width: 250px;
+            background-color: var(--primary-color);
+            color: white;
+            transition: all 0.3s;
+            position: fixed;
+            height: 100%;
+            overflow-y: auto;
+            z-index: 1000;
+        }
+
+        #sidebar .sidebar-header {
+            padding: 20px;
+            background-color: rgba(0, 0, 0, 0.1);
+        }
+
+        #sidebar ul.components {
+            padding: 20px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        #sidebar ul li a {
+            padding: 15px;
+            display: block;
+            color: white;
+            text-decoration: none;
+            transition: all 0.3s;
+            border-left: 3px solid transparent;
+        }
+
+        #sidebar ul li a:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+            border-left: 3px solid var(--secondary-color);
+        }
+
+        #sidebar ul li.active > a {
+            background-color: rgba(255, 255, 255, 0.1);
+            border-left: 3px solid var(--secondary-color);
+        }
+
+        #content {
+            width: calc(100% - 250px);
+            margin-left: 250px;
+            padding: 20px;
+            transition: all 0.3s;
+        }
+
+        .card {
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+            border: none;
+        }
+
+        .card-header {
+            background-color: white;
+            border-bottom: 1px solid #eee;
+            border-radius: 10px 10px 0 0 !important;
+            padding: 15px 20px;
+            font-weight: 600;
+        }
+
+        .table-responsive {
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        table thead th {
+            background-color: #f8f9fa;
+            font-weight: 600;
+            border-bottom: 2px solid #dee2e6;
+        }
+
+        .pagination {
+            margin-top: 20px;
+            justify-content: flex-end;
+        }
+
+        .pagination .page-item.active .page-link {
+            background-color: var(--secondary-color);
+            border-color: var(--secondary-color);
+        }
+
+        .pagination .page-link {
+            color: var(--primary-color);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            #sidebar {
+                width: 80px;
+                text-align: center;
+            }
+
+            #sidebar .sidebar-header h3 {
+                display: none;
+            }
+
+            #sidebar ul li a {
+                padding: 15px 10px;
+                text-align: center;
+            }
+
+            #sidebar ul li a span {
+                display: none;
+            }
+
+            #sidebar ul li a i {
+                font-size: 1.5rem;
+            }
+
+            #content {
+                width: calc(100% - 80px);
+                margin-left: 80px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Sidebar -->
+    <nav id="sidebar">
+        <div class="sidebar-header">
+            <h3>Budlex</h3>
+        </div>
+
+        <ul class="list-unstyled components">
+            <li>
+                <a href="index.html">
+                    <i class="fas fa-tachometer-alt me-2"></i>
+                    <span>Strona Główna</span>
+                </a>
+            </li>
+            <li>
+                <a href="products.html">
+                    <i class="fas fa-boxes me-2"></i>
+                    <span>Produkty</span>
+                </a>
+            </li>
+            <li>
+                <a href="warehouse.html">
+                    <i class="fas fa-warehouse me-2"></i>
+                    <span>Magazyn</span>
+                </a>
+            </li>
+            <li class="active">
+                <a href="orders.html">
+                    <i class="fas fa-shopping-cart me-2"></i>
+                    <span>Zamówienia</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+
+    <div id="content">
+        <h2 class="mb-4">Lista Zamówień</h2>
+
+        <div class="card">
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-striped table-hover">
+                        <thead>
+                            <tr>
+                                <th>Numer zamówienia</th>
+                                <th>Data zamówienia</th>
+                                <th>Status</th>
+                                <th>Łączna kwota netto</th>
+                                <th>Łączna kwota brutto</th>
+                                <th>Akcje</th>
+                            </tr>
+                        </thead>
+                        <tbody id="orderTableBody">
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- szczegóły zamoien  -->
+    <div class="modal fade" id="orderDetailsModal" tabindex="-1" aria-labelledby="orderDetailsModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="orderDetailsModalLabel">Szczegóły Zamówienia</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p><strong>Numer zamówienia:</strong> <span id="orderNumber"></span></p>
+                    <p><strong>Data zamówienia:</strong> <span id="orderDate"></span></p>
+                    <p><strong>Status:</strong> <span id="orderStatus"></span></p>
+                    <p><strong>Łączna kwota netto:</strong> <span id="orderNetAmount"></span></p>
+                    <p><strong>Łączna kwota brutto:</strong> <span id="orderGrossAmount"></span></p>
+                    <h5>Lista produktów:</h5>
+                    <ul id="orderProducts"></ul>
+                    <h5>Zmień status:</h5>
+                    <select id="orderStatusSelect" class="form-select">
+                        <option value="Złożone">Złożone</option>
+                        <option value="W realizacji">W realizacji</option>
+                        <option value="Zrealizowane">Zrealizowane</option>
+                    </select>
+                    <button class="btn btn-primary mt-3" onclick="updateOrderStatus()">Zaktualizuj status</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const orders = {
+            '12345': {
+                date: '2025-03-20',
+                status: 'Zrealizowane',
+                netAmount: '1500.00 zł',
+                grossAmount: '1845.00 zł',
+                products: ['Wkrętarka akumulatorowa 24V', 'Młotek ciesielski 600g']
+            },
+            '12346': {
+                date: '2025-03-21',
+                status: 'W realizacji',
+                netAmount: '2000.00 zł',
+                grossAmount: '2460.00 zł',
+                products: ['Wiertarka udarowa 1200W', 'Płyta OSB-3 22mm']
+            },
+            '12348': {
+                date: '2025-03-23',
+                status: 'Złożone',
+                netAmount: '1200.00 zł',
+                grossAmount: '1476.00 zł',
+                products: ['Farba lateksowa biała', 'Rozpuszczalnik uniwersalny']
+            },
+            '12349': {
+                date: '2025-03-24',
+                status: 'Złożone',
+                netAmount: '1800.00 zł',
+                grossAmount: '2214.00 zł',
+                products: ['Styropian fasadowy EPS 040', 'Cement portlandzki CEM I 42,5R']
+            },
+            '12350': {
+                date: '2025-03-25',
+                status: 'W realizacji',
+                netAmount: '2500.00 zł',
+                grossAmount: '3075.00 zł',
+                products: ['Wiertarka stołowa 750W', 'Płytki ceramiczne Carrara 30x30']
+            },
+            '12351': {
+                date: '2025-03-26',
+                status: 'Zrealizowane',
+                netAmount: '3000.00 zł',
+                grossAmount: '3690.00 zł',
+                products: ['Piła łańcuchowa 2000W', 'Gwoździe budowlane 5cm']
+            },
+            '12352': {
+                date: '2025-03-27',
+                status: 'Złożone',
+                netAmount: '4000.00 zł',
+                grossAmount: '4920.00 zł',
+                products: ['Wiertarka udarowa 1000W', 'Wkrętarka sieciowa 800W']
+            },
+            '12353': {
+                date: '2025-03-28',
+                status: 'W realizacji',
+                netAmount: '3500.00 zł',
+                grossAmount: '4305.00 zł',
+                products: ['Wiertarka stołowa 500W', 'Wiertło do betonu 12mm']
+            },
+            '12354': {
+                date: '2025-03-29',
+                status: 'Zrealizowane',
+                netAmount: '4500.00 zł',
+                grossAmount: '5535.00 zł',
+                products: ['Wkrętarka akumulatorowa 12V', 'Wiertarka udarowa 800W']
+            },
+            '12355': {
+                date: '2025-03-30',
+                status: 'Złożone',
+                netAmount: '5000.00 zł',
+                grossAmount: '6150.00 zł',
+                products: ['Wiertarka sieciowa 800W', 'Wiertarka udarowa 1000W']
+            },
+            '12356': {
+                date: '2025-03-31',
+                status: 'W realizacji',
+                netAmount: '5500.00 zł',
+                grossAmount: '6765.00 zł',
+                products: ['Wiertarka stołowa 750W', 'Wiertarka udarowa 1200W']
+            },
+            '12357': {
+                date: '2025-04-01',
+                status: 'Zrealizowane',
+                netAmount: '6000.00 zł',
+                grossAmount: '7380.00 zł',
+                products: ['Wkrętarka akumulatorowa 24V', 'Wiertarka stołowa 500W']
+            },
+            '12358': {
+                date: '2025-04-02',
+                status: 'Złożone',
+                netAmount: '6500.00 zł',
+                grossAmount: '7995.00 zł',
+                products: ['Wiertarka udarowa 1000W', 'Wiertarka sieciowa 800W']
+            },
+            '12359': {
+                date: '2025-04-03',
+                status: 'W realizacji',
+                netAmount: '7000.00 zł',
+                grossAmount: '8610.00 zł',
+                products: ['Wiertarka stołowa 750W', 'Wiertarka udarowa 1200W']
+            }
+        };
+
+        function loadOrders() {
+            const orderTableBody = document.getElementById('orderTableBody');
+            orderTableBody.innerHTML = '';
+            for (const orderId in orders) {
+                const order = orders[orderId];
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${orderId}</td>
+                    <td>${order.date}</td>
+                    <td><span class="badge ${getStatusBadgeClass(order.status)}">${order.status}</span></td>
+                    <td>${order.netAmount}</td>
+                    <td>${order.grossAmount}</td>
+                    <td><button class="btn btn-sm btn-primary" onclick="showOrderDetails('${orderId}')">Szczegóły</button></td>
+                `;
+                orderTableBody.appendChild(row);
+            }
+        }
+
+        function getStatusBadgeClass(status) {
+            switch (status) {
+                case 'Złożone':
+                    return 'bg-primary';
+                case 'W realizacji':
+                    return 'bg-warning';
+                case 'Zrealizowane':
+                    return 'bg-success';
+                default:
+                    return 'bg-secondary';
+            }
+        }
+
+        function showOrderDetails(orderId) {
+            const order = orders[orderId];
+            document.getElementById('orderNumber').innerText = orderId;
+            document.getElementById('orderDate').innerText = order.date;
+            document.getElementById('orderStatus').innerText = order.status;
+            document.getElementById('orderNetAmount').innerText = order.netAmount;
+            document.getElementById('orderGrossAmount').innerText = order.grossAmount;
+            document.getElementById('orderStatusSelect').value = order.status;
+            const productsList = document.getElementById('orderProducts');
+            productsList.innerHTML = '';
+            order.products.forEach(product => {
+                const li = document.createElement('li');
+                li.innerText = product;
+                productsList.appendChild(li);
+            });
+            const orderDetailsModal = new bootstrap.Modal(document.getElementById('orderDetailsModal'));
+            orderDetailsModal.show();
+        }
+
+        function updateOrderStatus() {
+            const orderId = document.getElementById('orderNumber').innerText;
+            const newStatus = document.getElementById('orderStatusSelect').value;
+            orders[orderId].status = newStatus;
+            loadOrders();
+            const orderDetailsModal = bootstrap.Modal.getInstance(document.getElementById('orderDetailsModal'));
+            orderDetailsModal.hide();
+        }
+
+        document.addEventListener('DOMContentLoaded', loadOrders);
+    </script>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.2.0/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
